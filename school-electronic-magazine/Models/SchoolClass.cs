@@ -2,14 +2,14 @@
 
 public class SchoolClass
 {
-    private int Id { get; set; }
+    private int id { get; set; }
     private List<Student> Students { get; set; } = new();
     
     public SchoolClass() { }
     
     public SchoolClass(int id, List<Student> students, string teacher)
     {
-        Id = id;
+        this.id = id;
         Students = students ?? new List<Student>();
     }
 

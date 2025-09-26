@@ -4,7 +4,7 @@ namespace school_electronic_magazine.Models;
 
 public class Admin : User
 {
-    private string Email { get; set; }
+    public string Email { get; set; }
     [NotMapped]
     public UserCredentials Credentials { get; set; }
     

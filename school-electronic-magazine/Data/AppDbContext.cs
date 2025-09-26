@@ -52,5 +52,4 @@ public class AppDbContext : DbContext
             .HasForeignKey<UserCredentials>(c => c.Id)
             .OnDelete(DeleteBehavior.Cascade);
     }
-
 }

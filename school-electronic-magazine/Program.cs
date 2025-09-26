@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using school_electronic_magazine.Data;
 using school_electronic_magazine.Models;
-using school_electronic_magazine.Repository.Student;
+using school_electronic_magazine.Repository.GenericRepository;
 using school_electronic_magazine.Services.Student;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,8 +18,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 );
 
 // Регистрация репозиториев и сервисов
-builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 var app = builder.Build();
 

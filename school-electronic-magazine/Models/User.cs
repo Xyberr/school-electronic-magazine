@@ -7,9 +7,9 @@ public class User
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    private int id;
-    private string fullName;
-    private DateTime dateOfBirth;
+    public int id;
+    public string fullName;
+    public DateTime dateOfBirth;
 
     public User() { }
     

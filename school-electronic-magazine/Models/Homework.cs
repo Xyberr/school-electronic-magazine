@@ -2,11 +2,11 @@
 
 public class Homework
 {
-    private int Id { get; set; }
-    private int AssignedToUserId { get; set; }
-    private string HomeworkText { get; set; } = string.Empty;
-    private DateTime Created { get; set; }
-    private DateTime Deadline { get; set; }
+    public int Id { get; set; }
+    public int AssignedToUserId { get; set; }
+    public string HomeworkText { get; set; } = string.Empty;
+    public DateTime Created { get; set; }
+    public DateTime Deadline { get; set; }
     
     public Homework() { }
     

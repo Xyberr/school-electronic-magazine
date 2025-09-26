@@ -4,8 +4,8 @@ namespace school_electronic_magazine.Models;
 
 public class Student : User
 {
-    private int SchoolClassId { get; set; }
-    private string PhoneNumberParent { get; set; }
+    public int SchoolClassId { get; set; }
+    public string PhoneNumberParent { get; set; }
     
     [NotMapped]
     public UserCredentials Credentials { get; set; }

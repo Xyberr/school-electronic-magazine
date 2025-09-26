@@ -1,35 +1,43 @@
-﻿using school_electronic_magazine.Repository.Student;
+﻿using school_electronic_magazine.Data;
+using school_electronic_magazine.Repository.GenericRepository;
 
 namespace school_electronic_magazine.Services.Student;
 
 public class StudentService : IStudentService
 {
-    private readonly IStudentRepository _studentRepository;
+    private readonly IGenericRepository<Models.Student>  _repository;
     
-    public StudentService(IStudentRepository studentRepository)
+    public StudentService(IGenericRepository<Models.Student> repository)
     {
-        _studentRepository = studentRepository;
+        _repository = repository;
     }
 
-    public IEnumerable<Models.Student> GetAllStudents()
+    public async Task<IEnumerable<Models.Student>> GetAllStudentsAsync()
     {
-       return _studentRepository.GetAllStudents();
+        return await _repository.GetAllAsync();
     }
-
-    public Models.Student GetStudentById(int id)
+    public async Task<Models.Student> GetStudentById(int id)
     {
-        var student = _studentRepository.GetStudentById(id);
+        var student = await _repository.GetByIdAsync(id);
         if (student == null)
             throw new KeyNotFoundException($"Student with id {id} not found.");
     
         return student;
     }
 
-    public string Create(DTO.StudentDto studentDto)
+    public async Task<string> Create(DTO.StudentDto studentDto)
     {
+
+        var student = new Models.Student()
+        {
+            FullName = studentDto.FullName,
+            DateOfBirth = studentDto.DateOfBirth,
+            PhoneNumberParent = studentDto.PhoneNumberParent
+        };
+        
         try
         {
-            _studentRepository.Create(studentDto);
+            await _repository.CreateAsync(student);
             return "Аккаунт создан";
         }
         catch (Exception ex)
@@ -39,13 +47,43 @@ public class StudentService : IStudentService
     }
     
 
-    public void Update(Models.Student student)
+    public async Task<string> Update(int id, DTO.StudentDto studentDto)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var student = await _repository.GetByIdAsync(id);
+            if (student == null)
+                return "Студент не найден";
+
+            student.FullName = studentDto.FullName;
+            student.DateOfBirth = studentDto.DateOfBirth;
+            student.PhoneNumberParent = studentDto.PhoneNumberParent;
+
+            await _repository.UpdateAsync(id, student);
+
+            return $"Аккаунт {student.id} обновлен";
+        }
+        catch (Exception ex)
+        {
+            return "Аккаунт не удалось обновить!";
+        }
     }
 
-    public void Delete(int id)
+    public async Task<string> Delete(int id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var student = await _repository.GetByIdAsync(id);
+            if (student == null)
+                return "Такого аккаунта не существует";
+            
+            await _repository.DeleteAsync(id);
+
+            return "Аккаунт успешно удалён";
+        }
+        catch (Exception e)
+        {
+            return "Не удалось удалить аккаунт";
+        }
     }
 }

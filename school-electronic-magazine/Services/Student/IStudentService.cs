@@ -2,9 +2,9 @@
 
 public interface IStudentService
 {
-    IEnumerable<Models.Student> GetAllStudents();
-    Models.Student GetStudentById(int id);
-    string Create(DTO.StudentDto studentDto);
-    void Update(Models.Student student);
-    void Delete(int id);
+    Task<IEnumerable<Models.Student>> GetAllStudentsAsync();
+    Task<Models.Student> GetStudentById(int id);
+    Task<string> Create(DTO.StudentDto studentDto);
+    Task<string> Update(int id, DTO.StudentDto studentDto);
+    Task<string> Delete(int id);
 }

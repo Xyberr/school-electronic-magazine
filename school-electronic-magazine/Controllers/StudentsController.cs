@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using school_electronic_magazine.DTO;
 using school_electronic_magazine.Models;
-using school_electronic_magazine.Repository.Student;
 using school_electronic_magazine.Services.Student;
 
 namespace school_electronic_magazine.Controllers;
@@ -19,17 +18,17 @@ public class StudentsController : ControllerBase
     }
     
     [HttpGet]
-    public IActionResult GetAllStudents()
+    public async Task<IActionResult> GetAllStudents()
     {
-        return Ok(_studentService.GetAllStudents());
+        return Ok(await _studentService.GetAllStudentsAsync());
     }
     
     [HttpGet("get_student_/{id}")]
-    public IActionResult GetStudentById(int id)
+    public async Task<IActionResult> GetStudentById(int id)
     {
         try
         {
-            var student = _studentService.GetStudentById(id);
+            var student = await _studentService.GetStudentById(id);
             return Ok(student);
         }
         catch (KeyNotFoundException ex)
@@ -39,8 +38,21 @@ public class StudentsController : ControllerBase
     }
 
     [HttpPost("add_student")]
-    public IActionResult AddStudent(StudentDto studentDto)
+    public async Task<IActionResult> AddStudent(StudentDto studentDto)
     {
-        return Ok(_studentService.Create(studentDto));
+        return Ok(await _studentService.Create(studentDto));
     }
+
+    [HttpPut("update_student")]
+    public async Task<IActionResult> UpdateStudent(int id, [FromBody]StudentDto studentDto)
+    {
+        return Ok(await _studentService.Update(id, studentDto));
+    }
+
+    [HttpDelete("delete_student_/{id}")]
+    public async Task<IActionResult> DeleteStudent(int id)
+    {
+        return Ok(await _studentService.Delete(id));
+    }
+    
 }

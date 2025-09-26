@@ -5,12 +5,13 @@ namespace school_electronic_magazine.Models;
 public class Teacher : User
 {
     
-    private string email { get; set; }
-    private string phoneNumber { get; set; }
+    public string email { get; set; }
+    public string phoneNumber { get; set; }
+    
     [NotMapped]
     public UserCredentials Credential { get; set; }
-    private List<string> TeachingSubjects { get; set; }
-    private List<string> HomeroomClasses { get; set; }
+    public List<string> TeachingSubjects { get; set; }
+    public List<string> HomeroomClasses { get; set; }
 
     Teacher() { }
     
