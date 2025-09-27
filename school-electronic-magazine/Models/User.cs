@@ -1,50 +1,40 @@
-﻿namespace school_electronic_magazine.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-public class User : BaseEntity
+namespace school_electronic_magazine.Models;
+
+public class User
 {
-    private string _name;
-    private int _age;
-    private string _role;
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int id;
+    public string fullName;
+    public DateTime dateOfBirth;
+
+    public User() { }
     
-    protected User() { }
-
-    public User(string name, int age, string role)
+    public User(int id, string fullName, DateTime dateOfBirth, UserCredentials credential)
     {
-        _name = name;
-        _age = age;
-        _role = role;
+        this.id = id;
+        this.fullName = fullName;
+        this.dateOfBirth = dateOfBirth;
     }
 
-    public string Role
+    public DateTime DateOfBirth
     {
-        get => _role;
-        set
-        {
-            if (string.IsNullOrEmpty(value))
-                throw new ArgumentException("Role cannot be null or empty"); // Проверка на пустую роль
-            _role = value;
-        }
+        get => dateOfBirth;
+        set => dateOfBirth = value;
     }
 
-    public int Age
+    public string FullName
     {
-        get => _age;
-        set
-        {
-            if (value < 0)
-                throw new ArgumentOutOfRangeException(nameof(value), value, "Age cannot be negative."); // Проверка на отрицательный возраст
-            _age = value;
-        }
+        get => fullName;
+        set => fullName = value ?? throw new ArgumentNullException(nameof(value));
     }
 
-    public string Name
+    public int Id
     {
-        get => _name;
-        set
-        {
-            if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentOutOfRangeException(nameof(value), value, "Name cannot be empty or whitespace."); // Проверка на пустое имя
-            _name = value;
-        }
+        get => id;
+        set => id = value;
     }
 }
