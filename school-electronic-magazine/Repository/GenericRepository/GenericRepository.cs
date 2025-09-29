@@ -1,49 +1,46 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using school_electronic_magazine.Data;
+using school_electronic_magazine.DTO;
 using school_electronic_magazine.Models;
 
 namespace school_electronic_magazine.Repository.GenericRepository;
 
-public class GenericRepository<T> : IGenericRepository<T> where T : class
+public class GenericRepository<T>(AppDbContext context) : IGenericRepository<T>
+    where T : class
 {
-    private readonly AppDbContext _context; // Для работы со всей БД
-    private readonly DbSet<T> _dbSet; // Для работы с отдельной таблицей
-    
-    public GenericRepository(AppDbContext context)
-    {
-        _context = context;
-        _dbSet = _context.Set<T>();
-    }
+    private readonly DbSet<T> _dbSet = context.Set<T>(); // Для работы с отдельной таблицей
 
     public async Task<IEnumerable<T>> GetAllAsync()
     {
-        return await _context.Set<T>().ToListAsync();
+        return await _dbSet.ToListAsync();
     }
 
-    public async Task<T> GetByIdAsync(int id)
+    public async Task<T> GetByIdAsync(long id)
     {
-        return await _context.Set<T>().FindAsync(id);
+        return await _dbSet.FindAsync(id);
     }
 
-    public async Task<T> CreateAsync(T Entity)
+    public async Task<T> CreateAsync(T entity)
     {
-        await _context.Set<T>().AddAsync(Entity);
-        await _context.SaveChangesAsync();
-        return Entity;
+        await _dbSet.AddAsync(entity);
+        await context.SaveChangesAsync();
+        return entity;
     }
 
-    public async Task<T> UpdateAsync(int id, T Entity)
+    public async Task<T> UpdateAsync(long id, T entity)
     {
-        _context.Set<T>().Update(Entity);
-        await _context.SaveChangesAsync();
-        return Entity;
+        var dbEntity = await _dbSet.FindAsync(id);
+        if (dbEntity != null) _dbSet.Update(dbEntity);
+        await context.SaveChangesAsync(); 
+        return entity;
     }
 
-    public async Task<T?> DeleteAsync(int id)
+    public async Task<long?> DeleteAsync(long id)
     {
-        _context.Set<T>().Remove(await _context.Set<T>().FindAsync(id));
-        await _context.SaveChangesAsync();
-        
-        return null;
+        var entity = await _dbSet.FindAsync(id);
+        if (entity == null) return null;
+        _dbSet.Remove(entity);
+        await context.SaveChangesAsync();   
+        return id;
     }
 }

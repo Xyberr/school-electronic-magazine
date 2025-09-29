@@ -1,21 +1,15 @@
-﻿namespace school_electronic_magazine.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-public class SchoolClass
+namespace school_electronic_magazine.Models;
+
+
+public class SchoolClass : BaseEntity
 {
-    private int id { get; set; }
-    private List<Student> Students { get; set; } = new();
+    [Required] public required long TeacherId { get; set; }
+    [Required] public required string Name { get; set; }
     
-    public SchoolClass() { }
-    
-    public SchoolClass(int id, List<Student> students, string teacher)
-    {
-        this.id = id;
-        Students = students ?? new List<Student>();
-    }
 
-    public List<Student> StudentsChecked
-    {
-        get => Students;
-        set => Students = value ?? throw new ArgumentNullException(nameof(value));
-    }
+    //public User Teacher { get; set; } = null!;
+    public ICollection<User> Students { get; set; } = new List<User>(); // Ученики класса
 }

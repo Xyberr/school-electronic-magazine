@@ -18,7 +18,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 );
 
 // Регистрация репозиториев и сервисов
-builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 var app = builder.Build();

@@ -134,3 +134,8 @@ D:\GitProjects\school-electronic-magazine\school-electronic-magazine\bin\Debug\n
 D:\GitProjects\school-electronic-magazine\school-electronic-magazine\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 D:\GitProjects\school-electronic-magazine\school-electronic-magazine\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 D:\GitProjects\school-electronic-magazine\school-electronic-magazine\bin\Debug\net8.0\runtimes\browser\lib\net8.0\System.Text.Encodings.Web.dll
+D:\GitProjects\school-electronic-magazine\school-electronic-magazine\bin\Debug\net8.0\AutoMapper.dll
+D:\GitProjects\school-electronic-magazine\school-electronic-magazine\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
+D:\GitProjects\school-electronic-magazine\school-electronic-magazine\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+D:\GitProjects\school-electronic-magazine\school-electronic-magazine\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+D:\GitProjects\school-electronic-magazine\school-electronic-magazine\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
