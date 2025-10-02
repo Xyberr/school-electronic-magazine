@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\school-electronic-magazine.props" />
-</Project>

@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\buildMultiTargeting\school-electronic-magazine.props" />
-</Project>
