@@ -29,8 +29,6 @@ export async function onLogin(login, password) {
 }
 
 export async function onLogout() {
-  localStorage.removeItem('token')
-
   return {
     status: 200,
     data: {

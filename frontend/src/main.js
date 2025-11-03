@@ -6,7 +6,6 @@ import Aura from '@primevue/themes/aura'
 import App from './App.vue'
 import router from './router'
 import { definePreset } from '@primevue/themes'
-import { useUserStore } from './stores/userStore'
 
 const app = createApp(App)
 
@@ -37,16 +36,6 @@ app.use(PrimeVue, {
       darkModeSelector: false,
     },
   },
-})
-
-router.beforeEach((to, from, next) => {
-  const userStore = useUserStore()
-
-  if (to.meta.requiresAuth && !userStore.isLogin) {
-    next('/login')
-  } else {
-    next()
-  }
 })
 
 app.mount('#app')
