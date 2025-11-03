@@ -13,10 +13,13 @@ public class User : BaseEntity
     [Required] public required string PasswordHash { get; set; } = null!;
     [Required] public required string Login { get; set; } = null!;
     [Required] public required long ClassId { get; set; }
-    [Required] public required string Role { get; set; }
+    //[Required] public required string Role { get; set; }
     
-    //public ICollection<Role> Roles { get; set; } = new List<Role>();
+    public ICollection<Role> Roles { get; set; } = new List<Role>();
     public ICollection<ContactInfo>? ContactInfos { get; set; }
-    public ICollection<SchoolJournal> SchoolJournal { get; set; } = new List<SchoolJournal>();
-    [NotMapped] public SchoolClass? SchoolClass { get; set; }
+    public ICollection<Subject>? Subjects { get; set; }
+    public ICollection<Lesson>? Lessons { get; set; }
+    public ICollection<Group>? Groups { get; set; }
+    public ICollection<Grade>? Grades { get; set; }
+    
 }

@@ -1,15 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace school_electronic_magazine.Models;
 
-
 public class SchoolClass : BaseEntity
 {
-    [Required] public required long TeacherId { get; set; }
-    [Required] public required string Name { get; set; }
+    [Required][MaxLength(1)] public required string GroupLabel { get; set; }
+    [Required] public required int ClassNumber { get; set; }
+    [Required] public required long GroupId { get; set; }
+    [Required] public required DateTime EnterDate { get; set; }
     
-
-    //public User Teacher { get; set; } = null!;
-    public ICollection<User> Students { get; set; } = new List<User>(); // Ученики класса
+    public ICollection<Lesson>? Lesson { get; set; }
+    public Group Group { get; set; }
+    public ICollection<Grade> Grade { get; set; }
 }

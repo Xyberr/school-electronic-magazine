@@ -13,5 +13,5 @@ public class UserDto
     [Required] public required string PasswordHash { get; set; } = null!;
     [Required] public required string Login { get; set; } = null!;
     [Required] public required long ClassId { get; set; }
-    [Required] public required string Role { get; set; } = null!;
+    public List<string> Roles { get; set; }
 }
