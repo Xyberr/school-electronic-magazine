@@ -14,7 +14,7 @@ watch(
   () => userStore.isLogin,
   (val) => {
     if (val) {
-      router.push('/privateRoute')
+      router.push('/private')
     }
   },
   { immediate: true }

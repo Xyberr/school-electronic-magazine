@@ -12,12 +12,18 @@ const onBtnLogOut = async () => {
 
     if (res.status === 200) {
       userStore.logOut()
-      router.push('/login')
+      router.push('/')
     }
   } catch (error) {
     console.log(error)
   }
 }
+
+definePage({
+  meta: {
+    requiresAuth: true,
+  },
+})
 
 </script>
 

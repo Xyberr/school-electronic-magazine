@@ -33,7 +33,7 @@ const onBtnLogin = async () => {
     if (res.status === 200) {
       const { user, token } = res.data
       userStore.logIn(user, token)
-      router.push('privateRoute')
+      router.push('/private')
     } else {
       serverError.value = res.data.message
     }

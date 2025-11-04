@@ -28,6 +28,7 @@
     "eslint-plugin-vue": "~10.3.0",
     "globals": "^16.3.0",
     "prettier": "3.6.2",
+    "unplugin-vue-router": "^0.16.1",
     "vite": "^7.0.6",
     "vite-plugin-vue-devtools": "^8.0.0"
   }

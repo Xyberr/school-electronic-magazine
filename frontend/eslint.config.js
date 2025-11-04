@@ -20,6 +20,12 @@ export default defineConfig([
     },
   },
 
+  {
+    "vue/multi-word-component-names": ["error", {
+      "ignores": []
+    }]
+  },
+
   js.configs.recommended,
   ...pluginVue.configs['flat/essential'],
   skipFormatting,
