@@ -8,5 +8,5 @@ public class Role : BaseEntity
     [Required] public required string Name { get; set; } = null!;
     [MaxLength(1024)] public string? Desc { get; set; }
     
-    [NotMapped] public ICollection<User> Users { get; set; } = new List<User>();
+    public ICollection<User> Users { get; set; } = new List<User>();
 }
