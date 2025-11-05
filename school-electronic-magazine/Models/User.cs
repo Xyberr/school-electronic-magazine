@@ -12,8 +12,7 @@ public class User : BaseEntity
     [Required] public required DateTime LastOnline { get; set; }
     [Required] public required string PasswordHash { get; set; } = null!;
     [Required] public required string Login { get; set; } = null!;
-    [Required] public required long ClassId { get; set; }
-    //[Required] public required string Role { get; set; }
+    [Required] public long ClassId { get; set; }
     
     public ICollection<Role> Roles { get; set; } = new List<Role>();
     public ICollection<ContactInfo>? ContactInfos { get; set; }
