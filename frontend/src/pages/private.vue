@@ -3,7 +3,7 @@ import { onLogout } from '@/API/authAPI';
 import { useUserStore } from '@/stores/userStore';
 import { useRouter } from 'vue-router';
 
-const userStore = useUserStore()
+const { logOut } = useUserStore()
 const router = useRouter()
 
 const onBtnLogOut = async () => {
@@ -11,7 +11,7 @@ const onBtnLogOut = async () => {
     const res = await onLogout()
 
     if (res.status === 200) {
-      userStore.logOut()
+      logOut()
       router.push('/')
     }
   } catch (error) {

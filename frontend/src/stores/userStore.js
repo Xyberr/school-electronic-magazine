@@ -1,8 +1,8 @@
 import { getUserByToken } from '@/API/authAPI'
-import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { createGlobalState } from '@vueuse/core'
 
-export const useUserStore = defineStore('userInfo', () => {
+export const useUserStore = createGlobalState(() => {
   let isLogin = ref(false)
   let user = ref(null)
 

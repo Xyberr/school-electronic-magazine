@@ -1,5 +1,4 @@
 import { createApp } from 'vue'
-import { createPinia } from 'pinia'
 import PrimeVue from 'primevue/config'
 import Aura from '@primevue/themes/aura'
 
@@ -27,7 +26,6 @@ const MyPreset = definePreset(Aura, {
   },
 })
 
-app.use(createPinia())
 app.use(router)
 app.use(PrimeVue, {
   theme: {

@@ -13,9 +13,9 @@ if (import.meta.hot) {
 
 // auth check
 router.beforeEach((to) => {
-  const userStore = useUserStore()
+  const { isLogin } = useUserStore()
 
-  if (to.meta.requiresAuth && !userStore.isLogin) {
+  if (to.meta.requiresAuth && !isLogin) {
     return '/'
   }
 })

@@ -10,7 +10,7 @@ import { onLogin } from '@/API/authAPI';
 
 const login = ref("")
 const password = ref("")
-const userStore = useUserStore()
+const { logIn } = useUserStore()
 const router = useRouter()
 
 const loginError = ref(false)
@@ -32,7 +32,7 @@ const onBtnLogin = async () => {
     const res = await onLogin(login.value, password.value)
     if (res.status === 200) {
       const { user, token } = res.data
-      userStore.logIn(user, token)
+      logIn(user, token)
       router.push('/private')
     } else {
       serverError.value = res.data.message
