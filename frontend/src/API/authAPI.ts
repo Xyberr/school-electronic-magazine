@@ -1,7 +1,7 @@
-import { mockUsers } from '@/mocks/users'
+import { mockUsers } from "@/mocks/users.ts"
 
-export async function onLogin(login, password) {
-  let user = mockUsers.find((element) => element.login === login && element.password === password)
+export async function onLogin(login: any, password: any) {
+  let user = mockUsers.find((element: any) => element.login === login && element.password === password)
 
   if (user) {
     return {
@@ -38,7 +38,7 @@ export async function onLogout() {
   }
 }
 
-export async function getUserByToken(token) {
+export async function getUserByToken(token: any) {
   if (!token) {
     return {
       status: 401,

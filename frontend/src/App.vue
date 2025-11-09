@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { RouterView, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 import { watch } from 'vue';

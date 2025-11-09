@@ -1,10 +1,10 @@
-import { getUserByToken } from '@/API/authAPI'
+import { getUserByToken } from '@/API/authAPI.ts'
 import { ref } from 'vue'
 import { createGlobalState } from '@vueuse/core'
 
 export const useUserStore = createGlobalState(() => {
   let isLogin = ref(false)
-  let user = ref(null)
+  let user = ref<any>(null)
 
   async function checkAuth() {
     const token = localStorage.getItem('token')
@@ -20,7 +20,7 @@ export const useUserStore = createGlobalState(() => {
     }
   }
 
-  function logIn(newUser, token) {
+  function logIn(newUser: any, token: any) {
     isLogin.value = true
     user.value = newUser
     localStorage.setItem('token', token)

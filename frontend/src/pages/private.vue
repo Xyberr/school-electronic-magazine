@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { onLogout } from '@/API/authAPI';
 import { useUserStore } from '@/stores/userStore';
 import { useRouter } from 'vue-router';

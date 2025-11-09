@@ -1,4 +1,4 @@
-import { useUserStore } from '@/stores/userStore'
+import { useUserStore } from '@/stores/userStore.ts'
 import { createRouter, createWebHistory } from 'vue-router'
 import { routes, handleHotUpdate } from 'vue-router/auto-routes'
 
@@ -15,7 +15,7 @@ if (import.meta.hot) {
 router.beforeEach((to) => {
   const { isLogin } = useUserStore()
 
-  if (to.meta.requiresAuth && !isLogin) {
+  if (to.meta.requiresAuth && !isLogin.value) {
     return '/'
   }
 })

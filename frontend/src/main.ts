@@ -1,9 +1,11 @@
 import { createApp } from 'vue'
+import type { Plugin } from 'vue'
+import PrimeVueConfig from 'primevue/config'
 import PrimeVue from 'primevue/config'
 import Aura from '@primevue/themes/aura'
 
 import App from './App.vue'
-import router from './router'
+import router from './router/index.ts'
 import { definePreset } from '@primevue/themes'
 
 const app = createApp(App)
@@ -27,7 +29,8 @@ const MyPreset = definePreset(Aura, {
 })
 
 app.use(router)
-app.use(PrimeVue, {
+
+app.use(PrimeVueConfig as unknown as Plugin, {
   theme: {
     preset: MyPreset,
     options: {

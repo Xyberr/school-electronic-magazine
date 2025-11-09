@@ -26,6 +26,12 @@ export default defineConfig([
     }]
   },
 
+  {
+    "globals": {
+      "definePage": "readonly"
+    }
+  },
+
   js.configs.recommended,
   ...pluginVue.configs['flat/essential'],
   skipFormatting,
