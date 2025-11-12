@@ -6,7 +6,7 @@ public interface ITokenService
 {
     public string GenerateAccessToken(string userId, List<String> roles);
     public string GenerateRefreshToken(string userId);
-    public bool CheckToken(string token);
+    public bool VerifyToken (string token);
     bool ValidateRefreshToken(string userId, string refreshToken);
     string GetUserIdFromToken(string accessToken);
     List<string> GetRolesFromToken(string accessToken);

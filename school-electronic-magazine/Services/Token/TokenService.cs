@@ -3,32 +3,25 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using school_electronic_magazine.DTO.Requests;
-using school_electronic_magazine.Models;
 
 namespace school_electronic_magazine.Services.Token;
 
-public class TokenService : ITokenService
+public class TokenService(IConfiguration config) : ITokenService
 {
-    private IConfiguration _config;
-    static Dictionary<string, string> refreshTokens = new();
+    private static readonly Dictionary<string, string> refreshTokens = new();
+    private readonly IConfiguration _config;
 
-    public TokenService(IConfiguration config)
-    {
-        _config = config;
-    }
-
-    public string GenerateAccessToken(string userId, List<String> roles)
+    public string GenerateAccessToken(string userId, List<string> roles)
     {
         var jwtSetting = _config.GetSection("Jwt");
         var key = Encoding.ASCII.GetBytes(jwtSetting["Key"]);
 
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, userId)
+            new(ClaimTypes.NameIdentifier, userId)
         };
-        
-        claims.AddRange(roles.Select(r=> new Claim("role", r.ToString())));
+
+        claims.AddRange(roles.Select(r => new Claim("role", r.ToString())));
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -47,16 +40,16 @@ public class TokenService : ITokenService
     public string GenerateRefreshToken(string userId)
     {
         var randomBytes = new byte[64];
-        using var rng = RandomNumberGenerator.Create();
-        rng.GetBytes(randomBytes);
+        using var randomNumberGenerator = RandomNumberGenerator.Create();
+        randomNumberGenerator.GetBytes(randomBytes);
         var refreshToken = Convert.ToBase64String(randomBytes);
-        
-         refreshTokens[userId] = refreshToken;
-        
+
+        refreshTokens[userId] = refreshToken;
+
         return refreshToken;
     }
-    
-    public bool CheckToken(string token)
+
+    public bool VerifyToken(string token)
     {
         var jwtSetting = _config.GetSection("Jwt");
         var key = Encoding.ASCII.GetBytes(jwtSetting["Key"]);
@@ -74,7 +67,7 @@ public class TokenService : ITokenService
                 ValidIssuer = jwtSetting["Issuer"],
                 ClockSkew = TimeSpan.Zero
             }, out _);
-            
+
             return true;
         }
         catch
@@ -83,25 +76,21 @@ public class TokenService : ITokenService
         }
     }
 
-    public bool ValidateRefreshToken(string userId, string refreshToken)
-    {
-        return refreshTokens.ContainsKey(userId) && refreshTokens[userId] == refreshToken;
-    }
-    
+    public bool ValidateRefreshToken(string userId, string refreshToken) =>
+        refreshTokens.ContainsKey(userId) && refreshTokens[userId] == refreshToken;
+
     public string GetUserIdFromToken(string accessToken)
     {
         var handler = new JwtSecurityTokenHandler();
         var token = handler.ReadJwtToken(accessToken);
 
-        var claim = token.Claims.FirstOrDefault(c =>
-            c.Type == ClaimTypes.NameIdentifier ||
-            c.Type == "nameid");
+        var claim = token.Claims.FirstOrDefault(c => c.Type is ClaimTypes.NameIdentifier or "nameid");
 
-        if (claim == null)
-            throw new InvalidOperationException("Клейм идентификатора пользователя не найден в токене");
-
-        return claim.Value;
+        return claim == null 
+               ? throw new InvalidOperationException("Клейм идентификатора пользователя не найден в токене") 
+               : claim.Value;
     }
+
     public List<string> GetRolesFromToken(string accessToken)
     {
         var handler = new JwtSecurityTokenHandler();

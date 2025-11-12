@@ -5,73 +5,54 @@ using school_electronic_magazine.DTO.Requests;
 using school_electronic_magazine.DTO.Response;
 using school_electronic_magazine.Models;
 using school_electronic_magazine.Repositories;
-using school_electronic_magazine.Repositories.User;
+using school_electronic_magazine.Repositories.Users;
 using school_electronic_magazine.Services.Token;
 
 namespace school_electronic_magazine.Services.Auth;
 
-public class UserService : IUserService
+public class UserService(IConfiguration config, IGenericRepository<User> repository, IUserRepository userRepository, ITokenService tokenService) : IUserService
 {
     private readonly IConfiguration _config;
     private readonly IGenericRepository<User> _repository;
     private readonly IUserRepository _userRepository;
     private readonly ITokenService _tokenService;
-
-    public UserService(IConfiguration config, IGenericRepository<User> repository, IUserRepository userRepository, ITokenService tokenService)
+    
+    public async Task<UserResponse> GetUserByLoginAsync(UserAuthRequestPayload userAuthRequestPayload)
     {
-        _config = config;
-        _repository = repository;
-        _userRepository = userRepository;
-        _tokenService = tokenService;
-    }
+        var user = await _userRepository.GetUserByLoginAsync(userAuthRequestPayload.Login);
 
-    public async Task<ServiceResponse<UserResponse>> GetUserByLoginAndPasswordAsync(UserAuthLoginRequest userAuthLoginRequest)
-    {
-        var user = await _userRepository.GetUserByLoginAndPasswordAsync(userAuthLoginRequest);
-        
         if (user == null)
-        {
-            return new ServiceResponse<UserResponse>
-            {
-                Success = false,
-                Message = "Пользователь не найден"
-            };
-        }
-
-        var roles = user.Roles.Select(r => r.Name).ToList();
+            throw new Exception("Пользователь не найден");
         
+        if (user.PasswordHash != userAuthRequestPayload.Password)
+            throw new Exception("Неверный пароль");
+
+        var roles = user.Roles.Select(role => role.Name).ToList();
+
         var accessToken = _tokenService.GenerateAccessToken(user.Id.ToString(), roles);
         var refreshToken = _tokenService.GenerateRefreshToken(user.Id.ToString());
-        
-        var response = new UserResponse
+
+        return new UserResponse
         {
-            Token = accessToken, 
+            Token = accessToken,
             Role = roles,
             RefreshToken = refreshToken
         };
-
-        return new ServiceResponse<UserResponse>
-        {
-            Success = true,
-            Data = response,
-            Message = "Успешный вход",
-        };
     }
 
-    public async Task<User> CreateUserAsync(UserDTO userDto)
+    public async Task<User> CreateUserAsync(UserRegisterRequestPayload userDto)
     {
-
         var user = new User
         {
             Name = userDto.Name,
             Surname = userDto.Surname,
             DateOfBirth = userDto.DateOfBirth,
-            PasswordHash = userDto.PasswordHash,
+            PasswordHash = userDto.Password,
             Login = userDto.Login,
             LastOnline = DateTime.UtcNow,
             CreationDate = DateTime.UtcNow
         };
         
-        return await _repository.AddAsync(user);
+        return await _repository.AddAsync(user, true);
     }
 }
