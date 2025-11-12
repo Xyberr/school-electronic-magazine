@@ -12,10 +12,10 @@ namespace school_electronic_magazine.Services.Auth;
 
 public class UserService(IConfiguration config, IGenericRepository<User> repository, IUserRepository userRepository, ITokenService tokenService) : IUserService
 {
-    private readonly IConfiguration _config;
-    private readonly IGenericRepository<User> _repository;
-    private readonly IUserRepository _userRepository;
-    private readonly ITokenService _tokenService;
+    private readonly IConfiguration _config = config;
+    private readonly IGenericRepository<User> _repository = repository;
+    private readonly IUserRepository _userRepository  = userRepository;
+    private readonly ITokenService _tokenService  = tokenService;
     
     public async Task<UserResponse> GetUserByLoginAsync(UserAuthRequestPayload userAuthRequestPayload)
     {

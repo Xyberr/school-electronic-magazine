@@ -8,8 +8,8 @@ namespace school_electronic_magazine.Services.Token;
 
 public class TokenService(IConfiguration config) : ITokenService
 {
-    private static readonly Dictionary<string, string> refreshTokens = new();
-    private readonly IConfiguration _config;
+    private static readonly Dictionary<string, string> refreshTokens = new(); // хранение рефреш токенов
+    private readonly IConfiguration _config = config;
 
     public string GenerateAccessToken(string userId, List<string> roles)
     {
@@ -21,7 +21,7 @@ public class TokenService(IConfiguration config) : ITokenService
             new(ClaimTypes.NameIdentifier, userId)
         };
 
-        claims.AddRange(roles.Select(r => new Claim("role", r.ToString())));
+        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {

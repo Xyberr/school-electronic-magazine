@@ -11,8 +11,8 @@ namespace school_electronic_magazine.Controllers;
 [Route("api/[controller]")]
 public class AuthController(IUserService userService, ITokenService tokenService) : ControllerBase
 {
-    private readonly IUserService _userService;
-    private readonly ITokenService _tokenService;
+    private readonly IUserService _userService = userService;
+    private readonly ITokenService _tokenService = tokenService;
 
     [HttpPost]
     [AllowAnonymous]
@@ -42,7 +42,7 @@ public class AuthController(IUserService userService, ITokenService tokenService
         return Ok(new { accessToken = newAccessToken });
     }
 
-    [HttpPost]
+    [HttpGet]
     [Authorize(Roles = "Teacher")]
     [Route("test-hello-teacher")]
     public IActionResult TestHelloTeacher()
