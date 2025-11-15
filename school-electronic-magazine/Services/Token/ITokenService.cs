@@ -1,13 +1,19 @@
-﻿using school_electronic_magazine.DTO.Requests;
+﻿using System.Security.Claims;
+using school_electronic_magazine.DTO.Requests;
 
 namespace school_electronic_magazine.Services.Token;
 
 public interface ITokenService
 {
-    public string GenerateAccessToken(string userId, List<String> roles);
-    public string GenerateRefreshToken(string userId);
-    public bool VerifyToken (string token);
-    bool ValidateRefreshToken(string userId, string refreshToken);
+    string GenerateAccessToken(string userId, List<string> roles);
+    string GenerateRefreshToken();
+
+    ClaimsPrincipal? ValidateAccessToken(string token);
     string GetUserIdFromToken(string accessToken);
     List<string> GetRolesFromToken(string accessToken);
+
+    bool IsAccessTokenValid(string token);
+
+    Task<bool> ValidateRefreshTokenAsync(long userId, string refreshToken);
+    Task<TokensRequestPayload> RotateRefreshTokenAsync(string expiredAccessToken, string oldRefreshToken);
 }

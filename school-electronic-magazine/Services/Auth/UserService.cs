@@ -1,58 +1,81 @@
-﻿using Microsoft.AspNetCore.Identity.Data;
-using school_electronic_magazine.Data;
-using school_electronic_magazine.DTO;
+﻿using school_electronic_magazine.DTO;
 using school_electronic_magazine.DTO.Requests;
 using school_electronic_magazine.DTO.Response;
 using school_electronic_magazine.Models;
 using school_electronic_magazine.Repositories;
+using school_electronic_magazine.Repositories.RefreshToken;
 using school_electronic_magazine.Repositories.Users;
 using school_electronic_magazine.Services.Token;
 
 namespace school_electronic_magazine.Services.Auth;
 
-public class UserService(IConfiguration config, IGenericRepository<User> repository, IUserRepository userRepository, ITokenService tokenService) : IUserService
+public class UserService(
+    IGenericRepository<User> geneticUserRepository,
+    IUserRepository userRepository,
+    ITokenService tokenService,
+    IGenericRepository<RefreshToken> geneticRefreshTokenRepository,
+    IRefreshTokenRepository refreshTokenRepository
+) : IUserService
 {
-    private readonly IConfiguration _config = config;
-    private readonly IGenericRepository<User> _repository = repository;
-    private readonly IUserRepository _userRepository  = userRepository;
-    private readonly ITokenService _tokenService  = tokenService;
-    
-    public async Task<UserResponse> GetUserByLoginAsync(UserAuthRequestPayload userAuthRequestPayload)
+    public async Task<UserAuthResponcePayload> AuthorizeUserAsync(UserAuthRequestPayload payload)
     {
-        var user = await _userRepository.GetUserByLoginAsync(userAuthRequestPayload.Login);
+        if (payload == null || string.IsNullOrWhiteSpace(payload.Login))
+            throw new UnauthorizedAccessException("Payload или логин отсутствует");
 
-        if (user == null)
-            throw new Exception("Пользователь не найден");
-        
-        if (user.PasswordHash != userAuthRequestPayload.Password)
-            throw new Exception("Неверный пароль");
+        // Получаем пользователя по логину
+        var user = await userRepository.GetUserByLoginAsync(payload.Login.Trim());
+        if (user == null || !BCrypt.Net.BCrypt.Verify(payload.Password, user.PasswordHash))
+            throw new UnauthorizedAccessException("Неверный логин или пароль");
 
-        var roles = user.Roles.Select(role => role.Name).ToList();
+        // Получаем роли пользователя
+        var roles = user.Roles?.Select(r => r.Name).ToList() ?? new List<string>();
 
-        var accessToken = _tokenService.GenerateAccessToken(user.Id.ToString(), roles);
-        var refreshToken = _tokenService.GenerateRefreshToken(user.Id.ToString());
+        // Генерируем новый refresh token
+        var refreshTokenEntity = new Models.RefreshToken
+        {
+            UserId = user.Id,
+            Token = tokenService.GenerateRefreshToken(),
+            ExpiryDate = DateTime.UtcNow.AddDays(30),
+            IsRevoked = false
+        };
 
-        return new UserResponse
+        // Сохраняем токен в базе через RefreshTokenRepository
+        await refreshTokenRepository.AddAsync(refreshTokenEntity);
+
+        // Генерируем access token
+        var accessToken = tokenService.GenerateAccessToken(user.Id.ToString(), roles);
+
+        // Возвращаем payload с access и refresh токенами
+        return new UserAuthResponcePayload
         {
             Token = accessToken,
             Role = roles,
-            RefreshToken = refreshToken
+            RefreshToken = refreshTokenEntity.Token
         };
     }
 
     public async Task<User> CreateUserAsync(UserRegisterRequestPayload userDto)
     {
+        if (userDto == null)
+            throw new ArgumentNullException(nameof(userDto));
+
+        var existingUser = await userRepository.GetUserByLoginAsync(userDto.Login.Trim());
+        if (existingUser != null)
+            throw new InvalidOperationException("Пользователь с таким логином, уже существует");
+
         var user = new User
         {
             Name = userDto.Name,
             Surname = userDto.Surname,
             DateOfBirth = userDto.DateOfBirth,
-            PasswordHash = userDto.Password,
-            Login = userDto.Login,
+            Login = userDto.Login.Trim(),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password),
             LastOnline = DateTime.UtcNow,
             CreationDate = DateTime.UtcNow
         };
-        
-        return await _repository.AddAsync(user, true);
+
+        await geneticUserRepository.AddAsync(user);
+        await geneticUserRepository.SaveChangesAsync();
+        return user;
     }
 }

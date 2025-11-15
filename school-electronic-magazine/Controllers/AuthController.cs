@@ -11,50 +11,39 @@ namespace school_electronic_magazine.Controllers;
 [Route("api/[controller]")]
 public class AuthController(IUserService userService, ITokenService tokenService) : ControllerBase
 {
-    private readonly IUserService _userService = userService;
-    private readonly ITokenService _tokenService = tokenService;
-
-    [HttpPost]
+    [HttpPost("login")]
     [AllowAnonymous]
-    [Route("login")]
-    public async Task<IActionResult> LoginAsync([FromBody] UserAuthRequestPayload  userAuthRequestPayload)
-       => Ok(await _userService.GetUserByLoginAsync(userAuthRequestPayload));
-
-    [HttpPost]
-    [Authorize(Roles = "Student, Teacher, Admin")]
-    [Route("refreshToken")]
-    public IActionResult CheckToken([FromBody] RefreshTokenRequestPayload refreshTokenRequestPayload)
+    public async Task<IActionResult> LoginAsync([FromBody] UserAuthRequestPayload userAuthRequestPayload)
     {
-        var accessToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-        
-        if (!_tokenService.VerifyToken(accessToken))
-            return Unauthorized(new { error = "Access token недействителен или истек" });
-
-        var userId = _tokenService.GetUserIdFromToken(accessToken);
-        
-        if (!_tokenService.ValidateRefreshToken(userId, refreshTokenRequestPayload.RefreshToken))
-            return Unauthorized(new { error = "Refresh token недействителен" });
-        
-        var roles = _tokenService.GetRolesFromToken(accessToken);
-
-        var newAccessToken = _tokenService.GenerateAccessToken(userId, roles);
-        
-        return Ok(new { accessToken = newAccessToken });
+        var response = await userService.AuthorizeUserAsync(userAuthRequestPayload);
+        return Ok(response);
     }
 
-    [HttpGet]
+    [HttpPost("refresh")]
+    public async Task<IActionResult> RefreshAsync([FromBody] RefreshTokenRequestPayload payload)
+    {
+        var oldToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+        var tokensRequestPayload = await tokenService.RotateRefreshTokenAsync(oldToken, payload.RefreshToken);
+
+        return Ok(tokensRequestPayload);
+    }
+
+    [HttpGet("test-hello-teacher")]
     [Authorize(Roles = "Teacher")]
-    [Route("test-hello-teacher")]
     public IActionResult TestHelloTeacher()
-    {
-        return Ok("hello teacher!");
-    }
+        => Ok("hello teacher!");
+
+    [HttpGet("test-roles")]
+    [Authorize(Roles = "Teacher, Student, Admin")]
+    public IActionResult TestRolesTeacher()
+        => Ok("hello!");
     
-    [HttpPost]
-    [Route("register")]
+    [HttpPost("register")]
+    [AllowAnonymous]
     public async Task<IActionResult> Register([FromBody] UserRegisterRequestPayload userRegisterRequestPayload)
     {
-        var user = await _userService.CreateUserAsync(userRegisterRequestPayload);
+        var user = await userService.CreateUserAsync(userRegisterRequestPayload);
         return Ok(user);
     }
 }

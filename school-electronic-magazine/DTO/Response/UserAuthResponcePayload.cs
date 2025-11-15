@@ -2,7 +2,7 @@
 
 namespace school_electronic_magazine.DTO.Response;
 
-public class UserResponse
+public class UserAuthResponcePayload
 {
     [Required] 
     public required string Token { get; set; }

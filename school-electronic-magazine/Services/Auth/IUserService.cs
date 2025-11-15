@@ -7,6 +7,6 @@ namespace school_electronic_magazine.Services.Auth;
 
 public interface IUserService
 {
-    Task<UserResponse> GetUserByLoginAsync(UserAuthRequestPayload userAuthRequestPayload);
+    Task<UserAuthResponcePayload> AuthorizeUserAsync(UserAuthRequestPayload userAuthRequestPayload);
     Task<User> CreateUserAsync(UserRegisterRequestPayload userDto);
 }

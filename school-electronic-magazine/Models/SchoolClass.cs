@@ -4,7 +4,8 @@ namespace school_electronic_magazine.Models;
 
 public class SchoolClass : BaseEntity
 {
-    [Required][MaxLength(1)] 
+    [Required]
+    [MaxLength(1)] 
     public required string GroupLabel { get; set; }
     
     [Required] 

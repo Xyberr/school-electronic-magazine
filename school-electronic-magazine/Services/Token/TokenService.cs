@@ -3,98 +3,162 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using school_electronic_magazine.DTO.Requests;
+using school_electronic_magazine.Models;
+using school_electronic_magazine.Repositories;
+using school_electronic_magazine.Services.Token;
 
-namespace school_electronic_magazine.Services.Token;
-
-public class TokenService(IConfiguration config) : ITokenService
+public class TokenService(IConfiguration config, IGenericRepository<RefreshToken> refreshRepository) : ITokenService
 {
-    private static readonly Dictionary<string, string> refreshTokens = new(); // хранение рефреш токенов
-    private readonly IConfiguration _config = config;
-
+    private readonly JwtSecurityTokenHandler _tokenHandler = new JwtSecurityTokenHandler();
     public string GenerateAccessToken(string userId, List<string> roles)
     {
-        var jwtSetting = _config.GetSection("Jwt");
-        var key = Encoding.ASCII.GetBytes(jwtSetting["Key"]);
+        var jwtSection = config.GetSection("Jwt");
+        var key = Encoding.UTF8.GetBytes(jwtSection["Key"]!);
 
-        var claims = new List<Claim>
-        {
-            new(ClaimTypes.NameIdentifier, userId)
-        };
-
+        var claims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier, userId) };
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(int.Parse(jwtSetting["ExpiresInMinutes"])),
-            Issuer = jwtSetting["Issuer"],
-            Audience = jwtSetting["Audience"],
+            Expires = DateTime.UtcNow.AddMinutes(int.Parse(jwtSection["ExpiresInMinutes"]!)),
+            Issuer = jwtSection["Issuer"],
+            Audience = jwtSection["Audience"],
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
         };
 
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        return tokenHandler.WriteToken(token);
+        var token = _tokenHandler.CreateToken(tokenDescriptor);
+        return _tokenHandler.WriteToken(token);
     }
-
-    public string GenerateRefreshToken(string userId)
+    
+    public string GenerateRefreshToken()
     {
-        var randomBytes = new byte[64];
-        using var randomNumberGenerator = RandomNumberGenerator.Create();
-        randomNumberGenerator.GetBytes(randomBytes);
-        var refreshToken = Convert.ToBase64String(randomBytes);
-
-        refreshTokens[userId] = refreshToken;
-
-        return refreshToken;
+        var bytes = new byte[64];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(bytes);
+        return Convert.ToBase64String(bytes);
     }
-
-    public bool VerifyToken(string token)
+    
+    public ClaimsPrincipal? ValidateAccessToken(string token)
     {
-        var jwtSetting = _config.GetSection("Jwt");
-        var key = Encoding.ASCII.GetBytes(jwtSetting["Key"]);
-        var tokenHandler = new JwtSecurityTokenHandler();
+        var jwtSection = config.GetSection("Jwt");
+        var key = Encoding.UTF8.GetBytes(jwtSection["Key"]!);
+
+        var validationParams = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtSection["Issuer"],
+            ValidateAudience = true,
+            ValidAudience = jwtSection["Audience"],
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
 
         try
         {
-            tokenHandler.ValidateToken(token, new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidAudience = jwtSetting["Audience"],
-                ValidIssuer = jwtSetting["Issuer"],
-                ClockSkew = TimeSpan.Zero
-            }, out _);
-
-            return true;
+            return _tokenHandler.ValidateToken(token, validationParams, out _);
         }
-        catch
+        catch (SecurityTokenException)
         {
-            return false;
+            return null;
+        }
+        catch (Exception)
+        {
+            return null; 
         }
     }
 
-    public bool ValidateRefreshToken(string userId, string refreshToken) =>
-        refreshTokens.ContainsKey(userId) && refreshTokens[userId] == refreshToken;
+    public bool IsAccessTokenValid(string token) => ValidateAccessToken(token) != null;
 
     public string GetUserIdFromToken(string accessToken)
     {
-        var handler = new JwtSecurityTokenHandler();
-        var token = handler.ReadJwtToken(accessToken);
-
-        var claim = token.Claims.FirstOrDefault(c => c.Type is ClaimTypes.NameIdentifier or "nameid");
-
-        return claim == null 
-               ? throw new InvalidOperationException("Клейм идентификатора пользователя не найден в токене") 
-               : claim.Value;
+        var token = _tokenHandler.ReadJwtToken(accessToken);
+        return token.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value
+               ?? throw new InvalidOperationException("UserId claim not found in token");
     }
-
     public List<string> GetRolesFromToken(string accessToken)
     {
-        var handler = new JwtSecurityTokenHandler();
-        var jwtToken = handler.ReadJwtToken(accessToken);
-        return jwtToken.Claims.Where(c => c.Type == "role").Select(c => c.Value).ToList();
+        var token = _tokenHandler.ReadJwtToken(accessToken);
+        return token.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
+    }
+    public async Task<RefreshToken?> GetValidRefreshTokenAsync(long userId, string refreshToken)
+    {
+        var allTokens = await refreshRepository.GetAllAsync();
+
+        var tokenRecord = allTokens.FirstOrDefault(r =>
+            r.UserId == userId &&
+            r.Token == refreshToken &&
+            !r.IsRevoked &&
+            r.ExpiryDate > DateTime.UtcNow);
+
+        if (tokenRecord == null)
+        {
+            Console.WriteLine($"[TokenService] Token not valid for user {userId}");
+            Console.WriteLine($"Incoming token: '{refreshToken}'");
+            foreach (var r in allTokens.Where(t => t.UserId == userId))
+            {
+                Console.WriteLine($"Stored token: '{r.Token}', IsRevoked: {r.IsRevoked}, Expiry: {r.ExpiryDate}");
+            }
+        }
+
+        return tokenRecord;
+    }
+    public async Task<bool> ValidateRefreshTokenAsync(long userId, string refreshToken)
+    {
+        var tokenRecord = await GetValidRefreshTokenAsync(userId, refreshToken);
+        return tokenRecord != null;
+    }
+    
+    public async Task<TokensRequestPayload> RotateRefreshTokenAsync(string expiredAccessToken, string oldRefreshToken)
+    {
+        var principal = GetPrincipalFromExpiredToken(expiredAccessToken);
+        var userIdStr = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                        ?? throw new UnauthorizedAccessException("Invalid token");
+        var userId = long.Parse(userIdStr);
+
+        var oldToken = await GetValidRefreshTokenAsync(userId, oldRefreshToken)
+                       ?? throw new UnauthorizedAccessException("Invalid refresh token");
+
+        oldToken.IsRevoked = true;
+        await refreshRepository.UpdateAsync(oldToken);
+
+        var jwtSection = config.GetSection("Jwt");
+        var newRefreshToken = GenerateRefreshToken();
+        var refreshExpiryMinutes = int.Parse(jwtSection["RefreshTokenExpiresInMinutes"]!);
+
+        await refreshRepository.AddAsync(new RefreshToken
+        {
+            UserId = userId,
+            Token = newRefreshToken,
+            ExpiryDate = DateTime.UtcNow.AddMinutes(refreshExpiryMinutes)
+        });
+
+        var roles = principal.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
+        var newAccessToken = GenerateAccessToken(userIdStr, roles);
+
+        return new TokensRequestPayload
+        {
+            AccessToken = newAccessToken,
+            RefreshToken = newRefreshToken
+        };
+    }
+
+    public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+    {
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!));
+
+        var validationParams = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = key,
+            ValidateLifetime = false
+        };
+
+        return _tokenHandler.ValidateToken(token, validationParams, out _);
     }
 }

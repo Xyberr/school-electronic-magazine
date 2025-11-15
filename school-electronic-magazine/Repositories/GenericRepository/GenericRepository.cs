@@ -6,14 +6,20 @@ using school_electronic_magazine.Models;
 
 namespace school_electronic_magazine.Repositories;
 
-public class GenericRepository<T>(AppDbContext context) : IGenericRepository<T> where T : class
+public class GenericRepository<T> : IGenericRepository<T> where T : class
 {
-    private readonly AppDbContext _context = context;
-    private readonly DbSet<T> _dbSet = context.Set<T>();
-    
+    private readonly AppDbContext _context;
+    private readonly DbSet<T> _dbSet;
+
+    public GenericRepository(AppDbContext context)
+    {
+        _context = context ?? throw new ArgumentNullException(nameof(context));
+        _dbSet = _context.Set<T>();
+    }
+
     public async Task<T?> GetByIdAsync(int id)
     {
-       return await _dbSet.FindAsync(id);
+        return await _dbSet.FindAsync(id);
     }
 
     public async Task<IEnumerable<T>> GetAllAsync()
@@ -21,21 +27,21 @@ public class GenericRepository<T>(AppDbContext context) : IGenericRepository<T> 
         return await _dbSet.ToListAsync();
     }
 
-    public async Task<T> AddAsync(T entity, bool needToCommit = true)
+    public async Task<T> AddAsync(T entity)
     {
+        if (entity == null) throw new ArgumentNullException(nameof(entity));
+
         await _dbSet.AddAsync(entity);
-        
-        if (needToCommit)
-            await _context.SaveChangesAsync();
-        
+
         return entity;
     }
 
     public async Task UpdateAsync(T entity)
     {
+        if (entity == null) throw new ArgumentNullException(nameof(entity));
+
         _dbSet.Update(entity);
         await _context.SaveChangesAsync();
-        return;
     }
 
     public async Task DeleteAsync(int id)
@@ -46,5 +52,10 @@ public class GenericRepository<T>(AppDbContext context) : IGenericRepository<T> 
             _dbSet.Remove(entity);
             await _context.SaveChangesAsync();
         }
+    }
+
+    public Task<int> SaveChangesAsync()
+    {
+        return _context.SaveChangesAsync();
     }
 }

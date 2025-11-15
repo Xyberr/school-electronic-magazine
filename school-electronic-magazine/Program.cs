@@ -5,7 +5,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using school_electronic_magazine.Data;
+using school_electronic_magazine.Models;
 using school_electronic_magazine.Repositories;
+using school_electronic_magazine.Repositories.RefreshToken;
 using school_electronic_magazine.Repositories.Users;
 using school_electronic_magazine.Services.Auth;
 using school_electronic_magazine.Services.Token;
@@ -75,19 +77,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
-builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IGenericRepository<User>, GenericRepository<User>>(); 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-builder.Services.AddAuthentication();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
-var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
 
 // Временно для фронта
 builder.Services.AddCors(options =>
@@ -101,6 +98,15 @@ builder.Services.AddCors(options =>
         });
 });
 
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseCors("AllowAllOrigins"); 
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();

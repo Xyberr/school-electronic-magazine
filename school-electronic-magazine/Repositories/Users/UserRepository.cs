@@ -7,11 +7,9 @@ namespace school_electronic_magazine.Repositories.Users;
 
 public class UserRepository(AppDbContext context) : GenericRepository<User>(context), IUserRepository
 {
-    private readonly AppDbContext _context = context;
     private readonly DbSet<User> _dbSet = context.Set<User>();
 
     public Task<User?> GetUserByLoginAsync(string login)
-        => _dbSet
-            .Include(user => user.Roles)
+        => _dbSet.Include(user => user.Roles)
             .FirstOrDefaultAsync(user => user.Login == login);
 }

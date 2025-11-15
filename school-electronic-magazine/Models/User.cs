@@ -33,5 +33,6 @@ public class User : BaseEntity
     public ICollection<Lesson>? Lessons { get; set; }
     public ICollection<Group>? Groups { get; set; }
     public ICollection<Grade>? Grades { get; set; }
-    
+    public ICollection<RefreshToken> RefreshTokens { get; set; }
+
 }
