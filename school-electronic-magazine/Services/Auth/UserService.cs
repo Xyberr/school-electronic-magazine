@@ -22,15 +22,12 @@ public class UserService(
         if (payload == null || string.IsNullOrWhiteSpace(payload.Login))
             throw new UnauthorizedAccessException("Payload или логин отсутствует");
 
-        // Получаем пользователя по логину
         var user = await userRepository.GetUserByLoginAsync(payload.Login.Trim());
         if (user == null || !BCrypt.Net.BCrypt.Verify(payload.Password, user.PasswordHash))
             throw new UnauthorizedAccessException("Неверный логин или пароль");
 
-        // Получаем роли пользователя
         var roles = user.Roles?.Select(r => r.Name).ToList() ?? new List<string>();
 
-        // Генерируем новый refresh token
         var refreshTokenEntity = new Models.RefreshToken
         {
             UserId = user.Id,
@@ -39,13 +36,11 @@ public class UserService(
             IsRevoked = false
         };
 
-        // Сохраняем токен в базе через RefreshTokenRepository
         await refreshTokenRepository.AddAsync(refreshTokenEntity);
+        await refreshTokenRepository.SaveChangesAsync();
 
-        // Генерируем access token
         var accessToken = tokenService.GenerateAccessToken(user.Id.ToString(), roles);
 
-        // Возвращаем payload с access и refresh токенами
         return new UserAuthResponcePayload
         {
             Token = accessToken,

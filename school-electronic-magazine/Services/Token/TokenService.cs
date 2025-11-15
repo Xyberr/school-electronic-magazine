@@ -123,18 +123,24 @@ public class TokenService(IConfiguration config, IGenericRepository<RefreshToken
                        ?? throw new UnauthorizedAccessException("Invalid refresh token");
 
         oldToken.IsRevoked = true;
+        oldToken.ExpiryDate = DateTime.SpecifyKind(oldToken.ExpiryDate, DateTimeKind.Utc);
+
         await refreshRepository.UpdateAsync(oldToken);
 
         var jwtSection = config.GetSection("Jwt");
         var newRefreshToken = GenerateRefreshToken();
         var refreshExpiryMinutes = int.Parse(jwtSection["RefreshTokenExpiresInMinutes"]!);
 
-        await refreshRepository.AddAsync(new RefreshToken
+        var newTokenEntity = new RefreshToken
         {
             UserId = userId,
             Token = newRefreshToken,
-            ExpiryDate = DateTime.UtcNow.AddMinutes(refreshExpiryMinutes)
-        });
+            ExpiryDate = DateTime.SpecifyKind(DateTime.UtcNow.AddMinutes(refreshExpiryMinutes), DateTimeKind.Utc),
+            IsRevoked = false
+        };
+
+        await refreshRepository.AddAsync(newTokenEntity);
+        await refreshRepository.SaveChangesAsync();
 
         var roles = principal.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
         var newAccessToken = GenerateAccessToken(userIdStr, roles);
