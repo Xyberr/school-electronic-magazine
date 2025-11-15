@@ -41,7 +41,6 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         if (entity == null) throw new ArgumentNullException(nameof(entity));
 
         _dbSet.Update(entity);
-        await _context.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(int id)
@@ -50,7 +49,6 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         if (entity != null)
         {
             _dbSet.Remove(entity);
-            await _context.SaveChangesAsync();
         }
     }
 

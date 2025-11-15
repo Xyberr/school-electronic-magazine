@@ -8,9 +8,8 @@ using school_electronic_magazine.Models;
 using school_electronic_magazine.Repositories;
 using school_electronic_magazine.Services.Token;
 
-public class TokenService(IConfiguration config, IGenericRepository<RefreshToken> refreshRepository) : ITokenService
+public class TokenService(IConfiguration config,JwtSecurityTokenHandler tokenHandler ,IGenericRepository<RefreshToken> refreshRepository) : ITokenService
 {
-    private readonly JwtSecurityTokenHandler _tokenHandler = new JwtSecurityTokenHandler();
     public string GenerateAccessToken(string userId, List<string> roles)
     {
         var jwtSection = config.GetSection("Jwt");
@@ -28,8 +27,8 @@ public class TokenService(IConfiguration config, IGenericRepository<RefreshToken
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
         };
 
-        var token = _tokenHandler.CreateToken(tokenDescriptor);
-        return _tokenHandler.WriteToken(token);
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
     }
     
     public string GenerateRefreshToken()
@@ -59,7 +58,7 @@ public class TokenService(IConfiguration config, IGenericRepository<RefreshToken
 
         try
         {
-            return _tokenHandler.ValidateToken(token, validationParams, out _);
+            return tokenHandler.ValidateToken(token, validationParams, out _);
         }
         catch (SecurityTokenException)
         {
@@ -75,13 +74,13 @@ public class TokenService(IConfiguration config, IGenericRepository<RefreshToken
 
     public string GetUserIdFromToken(string accessToken)
     {
-        var token = _tokenHandler.ReadJwtToken(accessToken);
+        var token = tokenHandler.ReadJwtToken(accessToken);
         return token.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value
                ?? throw new InvalidOperationException("UserId claim not found in token");
     }
     public List<string> GetRolesFromToken(string accessToken)
     {
-        var token = _tokenHandler.ReadJwtToken(accessToken);
+        var token = tokenHandler.ReadJwtToken(accessToken);
         return token.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
     }
     public async Task<RefreshToken?> GetValidRefreshTokenAsync(long userId, string refreshToken)
@@ -165,6 +164,6 @@ public class TokenService(IConfiguration config, IGenericRepository<RefreshToken
             ValidateLifetime = false
         };
 
-        return _tokenHandler.ValidateToken(token, validationParams, out _);
+        return tokenHandler.ValidateToken(token, validationParams, out _);
     }
 }
