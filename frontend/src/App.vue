@@ -1,24 +1,5 @@
 <script setup lang="ts">
-import { RouterView, useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/userStore';
-import { watch } from 'vue';
-
-// tryin to auth with token if we have one
-const { isLogin, checkAuth } = useUserStore()
-const router = useRouter()
-checkAuth()
-
-// use () => userStore.isLogin instead of userStore.isLogin
-// because https://ru.vuejs.org/guide/essentials/watchers#watch-source-types
-watch(
-  () => isLogin.value,
-  (val) => {
-    if (val) {
-      router.push('/private')
-    }
-  },
-  { immediate: true }
-)
+import { RouterView } from 'vue-router';
 </script>
 
 <template>

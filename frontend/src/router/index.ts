@@ -1,4 +1,3 @@
-import { useUserStore } from '@/stores/userStore.ts'
 import { createRouter, createWebHistory } from 'vue-router'
 import { routes, handleHotUpdate } from 'vue-router/auto-routes'
 
@@ -13,9 +12,27 @@ if (import.meta.hot) {
 
 // auth check
 router.beforeEach((to) => {
-  const { isLogin } = useUserStore()
+  const token = localStorage.getItem('token')
 
-  if (to.meta.requiresAuth && !isLogin.value) {
+  if (!to.meta.requiresAuth) {
+    return
+  }
+
+  if (!token) {
+    return '/'
+  }
+
+  let decoded
+  try {
+    decoded = JSON.parse(atob(token.split('.')[1] as string))
+  } catch (error) {
+    localStorage.removeItem('token')
+    return '/'
+  }
+
+  const expired = decoded.exp * 1000 < Date.now()
+  if (expired) {
+    localStorage.removeItem('token')
     return '/'
   }
 })

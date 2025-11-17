@@ -2,14 +2,20 @@
   "extends": "@vue/tsconfig/tsconfig.json",
   "compilerOptions": {
     "strict": true,
-    "moduleResolution": "node16",
+    "moduleResolution": "bundler",
     "target": "esnext",
-    "module": "node16",
+    "module": "esnext",
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "moduleDetection": "force",
     "jsx": "preserve",
+    "jsxImportSource": "vue",
     "allowJs": true,
     "checkJs": false,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "libReplacement": false,
+    "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]

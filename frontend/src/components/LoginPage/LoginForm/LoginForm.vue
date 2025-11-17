@@ -6,7 +6,13 @@ import Password from 'primevue/password';
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 import { useUserStore } from '@/stores/userStore';
-import { onLogin } from '@/API/authAPI';
+import { postApiAuthLogin } from '@/heyapi';
+
+interface loginData {
+  token: string,
+  refreshToken: string,
+  role: []
+}
 
 const login = ref("")
 const password = ref("")
@@ -29,13 +35,19 @@ const onBtnLogin = async () => {
 
   // sending req if fields are fine
   try {
-    const res = await onLogin(login.value, password.value)
-    if (res.status === 200) {
-      const { user, token } = res.data
-      logIn(user, token)
+    const res = await postApiAuthLogin({
+      body: {
+        login: login.value,
+        password: password.value
+      }
+    })
+
+    if (res.response.status === 200) {
+      const data = res.data as loginData
+      logIn(login.value, data.token)
       router.push('/private')
     } else {
-      serverError.value = res.data.message
+      serverError.value = `Server error: ${res.response.status}`
     }
   } catch (error) {
     serverError.value = `Server error: ${error}`
