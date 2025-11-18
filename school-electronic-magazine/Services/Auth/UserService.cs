@@ -3,7 +3,6 @@ using school_electronic_magazine.DTO.Requests;
 using school_electronic_magazine.DTO.Response;
 using school_electronic_magazine.Models;
 using school_electronic_magazine.Repositories;
-using school_electronic_magazine.Repositories.RefreshToken;
 using school_electronic_magazine.Repositories.Users;
 using school_electronic_magazine.Services.Token;
 
@@ -13,14 +12,13 @@ public class UserService(
     IGenericRepository<User> geneticUserRepository,
     IUserRepository userRepository,
     ITokenService tokenService,
-    IGenericRepository<RefreshToken> geneticRefreshTokenRepository,
-    IRefreshTokenRepository refreshTokenRepository
+    IGenericRepository<RefreshToken> geneticRefreshTokenRepository
 ) : IUserService
 {
     public async Task<UserAuthResponcePayload> AuthorizeUserAsync(UserAuthRequestPayload payload)
     {
         if (payload == null || string.IsNullOrWhiteSpace(payload.Login))
-            throw new UnauthorizedAccessException("Payload или логин отсутствует");
+            throw new UnauthorizedAccessException("Неверный логин или пароль");
 
         var user = await userRepository.GetUserByLoginAsync(payload.Login.Trim());
         if (user == null || !BCrypt.Net.BCrypt.Verify(payload.Password, user.PasswordHash))
@@ -36,8 +34,8 @@ public class UserService(
             IsRevoked = false
         };
 
-        await refreshTokenRepository.AddAsync(refreshTokenEntity);
-        await refreshTokenRepository.SaveChangesAsync();
+        await geneticRefreshTokenRepository.AddAsync(refreshTokenEntity);
+        await geneticRefreshTokenRepository.SaveChangesAsync();
 
         var accessToken = tokenService.GenerateAccessToken(user.Id.ToString(), roles);
 

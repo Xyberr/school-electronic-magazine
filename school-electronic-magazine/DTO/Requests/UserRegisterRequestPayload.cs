@@ -1,10 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
+
+
 namespace school_electronic_magazine.DTO;
 
 public record class UserRegisterRequestPayload
 {
     [Required] 
     public string Name { get; init; } = null!;
+    
     [Required] 
     public string Surname { get; init; } = null!;
 
@@ -18,6 +21,7 @@ public record class UserRegisterRequestPayload
     }
     [Required] 
     public string Login { get; init; } = null!;
+    
     [Required] 
     public string Password { get; init; } = null!;
 }

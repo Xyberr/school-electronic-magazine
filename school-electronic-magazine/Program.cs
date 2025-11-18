@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
@@ -5,9 +6,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using school_electronic_magazine.Data;
+using school_electronic_magazine.Infrastructure.Auth;
 using school_electronic_magazine.Models;
 using school_electronic_magazine.Repositories;
-using school_electronic_magazine.Repositories.RefreshToken;
 using school_electronic_magazine.Repositories.Users;
 using school_electronic_magazine.Services.Auth;
 using school_electronic_magazine.Services.Token;
@@ -82,9 +83,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IGenericRepository<User>, GenericRepository<User>>(); 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-
-
+builder.Services.AddSingleton<JwtSecurityTokenHandler>();
+builder.Services.AddSingleton<ITokenValidationParametersBuilder, TokenValidationParametersBuilder>();
 
 // Временно для фронта
 builder.Services.AddCors(options =>
@@ -97,7 +97,6 @@ builder.Services.AddCors(options =>
                 .AllowAnyHeader(); 
         });
 });
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

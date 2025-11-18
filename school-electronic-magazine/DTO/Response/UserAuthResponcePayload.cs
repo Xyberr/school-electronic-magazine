@@ -9,5 +9,6 @@ public class UserAuthResponcePayload
     
     [Required] 
     public string RefreshToken { get; set; }
+    
     public List<String> Role { get; set; }
 }

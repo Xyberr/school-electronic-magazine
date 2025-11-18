@@ -14,12 +14,10 @@ public class AuthController(IUserService userService, ITokenService tokenService
     [HttpPost("login")]
     [AllowAnonymous]
     public async Task<IActionResult> LoginAsync([FromBody] UserAuthRequestPayload userAuthRequestPayload)
-    {
-        var response = await userService.AuthorizeUserAsync(userAuthRequestPayload);
-        return Ok(response);
-    }
+        => Ok(await userService.AuthorizeUserAsync(userAuthRequestPayload));
 
-    [HttpPost("refresh")]
+    [AllowAnonymous]
+    [HttpPost("refreshToken")]
     public async Task<IActionResult> RefreshAsync([FromBody] RefreshTokenRequestPayload payload)
     {
         var oldToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
@@ -42,8 +40,5 @@ public class AuthController(IUserService userService, ITokenService tokenService
     [HttpPost("register")]
     [AllowAnonymous]
     public async Task<IActionResult> Register([FromBody] UserRegisterRequestPayload userRegisterRequestPayload)
-    {
-        var user = await userService.CreateUserAsync(userRegisterRequestPayload);
-        return Ok(user);
-    }
+        => Ok(await userService.CreateUserAsync(userRegisterRequestPayload));
 }

@@ -15,5 +15,5 @@ public interface ITokenService
     bool IsAccessTokenValid(string token);
 
     Task<bool> ValidateRefreshTokenAsync(long userId, string refreshToken);
-    Task<TokensRequestPayload> RotateRefreshTokenAsync(string expiredAccessToken, string oldRefreshToken);
+    Task<TokensResponsePayload> RotateRefreshTokenAsync(string expiredAccessToken, string oldRefreshToken);
 }

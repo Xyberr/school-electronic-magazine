@@ -2,14 +2,23 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using school_electronic_magazine.DTO.Requests;
 using school_electronic_magazine.Models;
 using school_electronic_magazine.Repositories;
 using school_electronic_magazine.Services.Token;
+using school_electronic_magazine.Infrastructure.Auth;
 
-public class TokenService(IConfiguration config,JwtSecurityTokenHandler tokenHandler ,IGenericRepository<RefreshToken> refreshRepository) : ITokenService
+public class TokenService(
+    IConfiguration config,
+    ITokenValidationParametersBuilder builder,
+    JwtSecurityTokenHandler tokenHandler,
+    IGenericRepository<RefreshToken> refreshRepository
+) : ITokenService
 {
+    private readonly TokenValidationParameters _validationParams = builder.Build(); // Я так и не смог запихать его в primary constructor
+    
     public string GenerateAccessToken(string userId, List<string> roles)
     {
         var jwtSection = config.GetSection("Jwt");
@@ -41,32 +50,13 @@ public class TokenService(IConfiguration config,JwtSecurityTokenHandler tokenHan
     
     public ClaimsPrincipal? ValidateAccessToken(string token)
     {
-        var jwtSection = config.GetSection("Jwt");
-        var key = Encoding.UTF8.GetBytes(jwtSection["Key"]!);
-
-        var validationParams = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = jwtSection["Issuer"],
-            ValidateAudience = true,
-            ValidAudience = jwtSection["Audience"],
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(key),
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
-        };
-
         try
         {
-            return tokenHandler.ValidateToken(token, validationParams, out _);
+            return tokenHandler.ValidateToken(token, _validationParams, out _);
         }
-        catch (SecurityTokenException)
+        catch
         {
             return null;
-        }
-        catch (Exception)
-        {
-            return null; 
         }
     }
 
@@ -85,21 +75,27 @@ public class TokenService(IConfiguration config,JwtSecurityTokenHandler tokenHan
     }
     public async Task<RefreshToken?> GetValidRefreshTokenAsync(long userId, string refreshToken)
     {
-        var allTokens = await refreshRepository.GetAllAsync();
-
-        var tokenRecord = allTokens.FirstOrDefault(r =>
-            r.UserId == userId &&
-            r.Token == refreshToken &&
-            !r.IsRevoked &&
-            r.ExpiryDate > DateTime.UtcNow);
+        var tokenRecord = await refreshRepository.Query()
+            .Where(r =>
+                r.UserId == userId &&
+                r.Token == refreshToken &&
+                !r.IsRevoked &&
+                r.ExpiryDate > DateTime.UtcNow)
+            .FirstOrDefaultAsync();
 
         if (tokenRecord == null)
         {
             Console.WriteLine($"[TokenService] Token not valid for user {userId}");
             Console.WriteLine($"Incoming token: '{refreshToken}'");
-            foreach (var r in allTokens.Where(t => t.UserId == userId))
+
+            var userTokens = await refreshRepository.Query()
+                .Where(t => t.UserId == userId)
+                .ToListAsync();
+
+            foreach (var r in userTokens)
             {
-                Console.WriteLine($"Stored token: '{r.Token}', IsRevoked: {r.IsRevoked}, Expiry: {r.ExpiryDate}");
+                Console.WriteLine(
+                    $"Stored token: '{r.Token}', IsRevoked: {r.IsRevoked}, Expiry: {r.ExpiryDate}");
             }
         }
 
@@ -111,7 +107,7 @@ public class TokenService(IConfiguration config,JwtSecurityTokenHandler tokenHan
         return tokenRecord != null;
     }
     
-    public async Task<TokensRequestPayload> RotateRefreshTokenAsync(string expiredAccessToken, string oldRefreshToken)
+    public async Task<TokensResponsePayload> RotateRefreshTokenAsync(string expiredAccessToken, string oldRefreshToken)
     {
         var principal = GetPrincipalFromExpiredToken(expiredAccessToken);
         var userIdStr = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
@@ -122,8 +118,6 @@ public class TokenService(IConfiguration config,JwtSecurityTokenHandler tokenHan
                        ?? throw new UnauthorizedAccessException("Invalid refresh token");
 
         oldToken.IsRevoked = true;
-        oldToken.ExpiryDate = DateTime.SpecifyKind(oldToken.ExpiryDate, DateTimeKind.Utc);
-
         await refreshRepository.UpdateAsync(oldToken);
 
         var jwtSection = config.GetSection("Jwt");
@@ -139,12 +133,13 @@ public class TokenService(IConfiguration config,JwtSecurityTokenHandler tokenHan
         };
 
         await refreshRepository.AddAsync(newTokenEntity);
-        await refreshRepository.SaveChangesAsync();
 
         var roles = principal.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
         var newAccessToken = GenerateAccessToken(userIdStr, roles);
 
-        return new TokensRequestPayload
+        await refreshRepository.SaveChangesAsync();
+        
+        return new TokensResponsePayload
         {
             AccessToken = newAccessToken,
             RefreshToken = newRefreshToken
