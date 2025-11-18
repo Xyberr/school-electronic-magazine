@@ -2,13 +2,13 @@
 
 namespace school_electronic_magazine.DTO.Response;
 
-public class UserAuthResponcePayload
+public record UserAuthResponcePayload
 {
     [Required] 
-    public required string Token { get; set; }
+    public required string Token { get; init; }
     
     [Required] 
-    public string RefreshToken { get; set; }
+    public string RefreshToken { get; init; }
     
-    public List<String> Role { get; set; }
+    public List<String> Role { get; init; }
 }
