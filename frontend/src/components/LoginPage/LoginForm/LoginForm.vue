@@ -80,6 +80,7 @@ const onBtnLogin = async () => {
 <style scoped>
 .loginForm {
   width: fit-content;
+  max-width: 295px;
 }
 
 .formContent {

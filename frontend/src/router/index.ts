@@ -19,7 +19,7 @@ router.beforeEach((to) => {
   }
 
   if (!token) {
-    return '/'
+    return '/login'
   }
 
   let decoded
@@ -27,13 +27,13 @@ router.beforeEach((to) => {
     decoded = JSON.parse(atob(token.split('.')[1] as string))
   } catch (error) {
     localStorage.removeItem('token')
-    return '/'
+    return '/login'
   }
 
   const expired = decoded.exp * 1000 < Date.now()
   if (expired) {
     localStorage.removeItem('token')
-    return '/'
+    return '/login'
   }
 })
 

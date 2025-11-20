@@ -1,19 +1,14 @@
 <script setup lang="ts">
-import LoginForm from '../components/LoginPage/LoginForm/LoginForm.vue'
-
+definePage({
+  meta: {
+    requiresAuth: true,
+  },
+})
 </script>
 
 <template>
-  <div class="loginPage">
-    <LoginForm />
-  </div>
+  <h1>Index Page</h1>
 </template>
 
 <style scoped>
-  .loginPage {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-  }
 </style>
