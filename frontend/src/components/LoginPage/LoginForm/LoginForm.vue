@@ -7,6 +7,7 @@ import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 import { useUserStore } from '@/stores/userStore';
 import { postApiAuthLogin } from '@/heyapi';
+import * as z from "zod";
 
 interface loginData {
   token: string,
@@ -14,24 +15,44 @@ interface loginData {
   role: []
 }
 
+const UserScheme = z.object({
+  login: z
+    .string()
+    .min(5, "Invalid login length")
+    .max(32, "Invalid login length"),
+  password: z
+    .string()
+    .min(5, "Invalid password length")
+    .max(64, "Invalid password length"),
+})
+
 const login = ref("")
 const password = ref("")
 const { logIn } = useUserStore()
 const router = useRouter()
 
-const loginError = ref(false)
-const passwordError = ref(false)
+const loginError = ref("")
+const passwordError = ref("")
 const serverError = ref("")
 
 const onBtnLogin = async () => {
-  loginError.value = false
-  passwordError.value = false
+  loginError.value = ""
+  passwordError.value = ""
   serverError.value = ""
 
-  // validating form
-  if (!login.value) loginError.value = true
-  if (!password.value) passwordError.value = true
-  if (loginError.value || passwordError.value) return
+  const validation = UserScheme.safeParse({
+    login: login.value,
+    password: password.value
+  })
+
+  if (!validation.success) {
+    const issues = z.treeifyError(validation.error)
+
+    loginError.value = issues.properties?.login?.errors[0] || ""
+    passwordError.value = issues.properties?.password?.errors[0] || ""
+
+    return
+  }
 
   // sending req if fields are fine
   try {
@@ -61,9 +82,13 @@ const onBtnLogin = async () => {
       <div class="formContent">
         <h1>Login Form</h1>
 
-        <InputText type="text" placeholder="Login" v-model="login" :invalid="loginError" />
+        <InputText type="text" placeholder="Login" v-model="login" :invalid="!!loginError" />
 
-        <Password :feedback="false" toggleMask placeholder="Password" v-model="password" :invalid="passwordError" />
+        <p v-if="loginError" class="error">{{ loginError }}</p>
+
+        <Password :feedback="false" toggleMask placeholder="Password" v-model="password" :invalid="!!passwordError" />
+
+        <p v-if="passwordError" class="error">{{ passwordError }}</p>
 
         <p v-if="serverError" class="error">{{ serverError }}</p>
 
