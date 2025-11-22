@@ -1,6 +1,14 @@
-﻿namespace school_electronic_magazine.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-public abstract class BaseEntity
+namespace school_electronic_magazine.Models;
+
+public class BaseEntity
 {
-    public string id { get; set; }
+    [Key] 
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public long Id { get; set; }
+    
+    [Required] 
+    public required DateTime CreationDate { get; set; }
 }

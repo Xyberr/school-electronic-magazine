@@ -1,50 +1,38 @@
-﻿namespace school_electronic_magazine.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Reflection.Metadata;
+
+namespace school_electronic_magazine.Models;
 
 public class User : BaseEntity
 {
-    private string _name;
-    private int _age;
-    private string _role;
+    [Required] 
+    public required string Name { get; set; } = null!;
     
-    protected User() { }
+    [Required] 
+    public required string Surname { get; set; } = null!;
+    
+    [Required] 
+    public required DateTime DateOfBirth { get; set; } 
+    
+    [Required] 
+    public required DateTime LastOnline { get; set; }
+    
+    [Required] 
+    public required string PasswordHash { get; set; } = null!;
+    
+    [Required] 
+    public required string Login { get; set; } = null!;
+    
+    [Required] 
+    public long ClassId { get; set; }
+    
+    public ICollection<Role> Roles { get; set; } = new List<Role>();
+    public ICollection<ContactInfo>? ContactInfos { get; set; }
+    public ICollection<Subject>? Subjects { get; set; }
+    public ICollection<Lesson>? Lessons { get; set; }
+    public ICollection<Group>? Groups { get; set; }
+    public ICollection<Grade>? Grades { get; set; }
+    public ICollection<RefreshToken> RefreshTokens { get; set; }
 
-    public User(string name, int age, string role)
-    {
-        _name = name;
-        _age = age;
-        _role = role;
-    }
-
-    public string Role
-    {
-        get => _role;
-        set
-        {
-            if (string.IsNullOrEmpty(value))
-                throw new ArgumentException("Role cannot be null or empty"); // Проверка на пустую роль
-            _role = value;
-        }
-    }
-
-    public int Age
-    {
-        get => _age;
-        set
-        {
-            if (value < 0)
-                throw new ArgumentOutOfRangeException(nameof(value), value, "Age cannot be negative."); // Проверка на отрицательный возраст
-            _age = value;
-        }
-    }
-
-    public string Name
-    {
-        get => _name;
-        set
-        {
-            if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentOutOfRangeException(nameof(value), value, "Name cannot be empty or whitespace."); // Проверка на пустое имя
-            _name = value;
-        }
-    }
 }
