@@ -1,4 +1,5 @@
-﻿using school_electronic_magazine.DTO;
+﻿using Microsoft.EntityFrameworkCore;
+using school_electronic_magazine.DTO;
 using school_electronic_magazine.DTO.Requests;
 using school_electronic_magazine.DTO.Response;
 using school_electronic_magazine.Models;
@@ -10,6 +11,7 @@ namespace school_electronic_magazine.Services.Auth;
 
 public class UserService(
     IGenericRepository<User> geneticUserRepository,
+    IGenericRepository<Role> geneticRoleRepository,
     IUserRepository userRepository,
     ITokenService tokenService,
     IGenericRepository<RefreshToken> geneticRefreshTokenRepository
@@ -70,5 +72,71 @@ public class UserService(
         await geneticUserRepository.AddAsync(user);
         await geneticUserRepository.SaveChangesAsync();
         return user;
+    }
+    
+    public async Task AddRolesAsync(long userId, List<string> roles)
+    {
+        if (roles == null || roles.Count == 0)
+            throw new InvalidOperationException("Список ролей пуст");
+
+        var user = await geneticUserRepository.GetByIdAsync(userId);
+
+        if (user == null)
+            throw new InvalidOperationException("Пользователь не найден");
+
+        user.Roles ??= new List<Role>();
+        
+        var allRoles = await geneticRoleRepository.GetAllAsync();
+
+        foreach (var roleName in roles)
+        {
+            var role = allRoles.FirstOrDefault(r => r.Name == roleName);
+
+            if (role == null)
+                throw new InvalidOperationException($"Роль '{roleName}' не найдена");
+
+            if (user.Roles.Any(r => r.Id == role.Id))
+                continue;
+
+            user.Roles.Add(role);
+        }
+
+        await geneticUserRepository.UpdateAsync(user);
+        await geneticUserRepository.SaveChangesAsync();
+    }
+
+    public async Task RemoveRolesAsync(long userId, List<string> roles)
+    {
+        if (roles == null || roles.Count == 0)
+            throw new ArgumentException("Не указаны роли, которые нужно удалить");
+
+        var user = await geneticUserRepository
+            .Query()
+            .Include(u => u.Roles)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user == null)
+            throw new ArgumentException("Пользователь не найден");
+
+        if (user.Roles == null || user.Roles.Count == 0)
+            throw new InvalidOperationException("У пользователя нет ролей");
+
+        var allRoles = await geneticRoleRepository.GetAllAsync();
+
+        foreach (var roleName in roles)
+        {
+            var role = allRoles.FirstOrDefault(r => r.Name == roleName);
+            if (role == null)
+                throw new ArgumentException($"Роль '{roleName}' не найдена");
+
+            var existingRole = user.Roles.FirstOrDefault(r => r.Name == roleName);
+            if (existingRole == null)
+                throw new InvalidOperationException($"У пользователя нет роли '{roleName}'");
+
+            user.Roles.Remove(existingRole);
+        }
+
+        await geneticUserRepository.UpdateAsync(user);
+        await geneticUserRepository.SaveChangesAsync();
     }
 }
