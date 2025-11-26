@@ -11,4 +11,5 @@ public interface IUserService
     Task<User> CreateUserAsync(UserRegisterRequestPayload userDto);
     Task AddRolesAsync(long userId, List<string> roles);
     Task RemoveRolesAsync(long userId, List<string> roles);
+    Task RemoveUserByIdAsync(long userId);
 }

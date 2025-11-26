@@ -39,7 +39,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         _dbSet.Update(entity);
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(long id)
     {
         var entity = await GetByIdAsync(id);
         if (entity != null)
