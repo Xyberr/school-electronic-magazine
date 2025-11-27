@@ -8,8 +8,12 @@ using Microsoft.OpenApi.Models;
 using school_electronic_magazine.Data;
 using school_electronic_magazine.Models;
 using school_electronic_magazine.Repositories;
+using school_electronic_magazine.Repositories.SchoolClass;
+using school_electronic_magazine.Repositories.Subject;
 using school_electronic_magazine.Repositories.Users;
 using school_electronic_magazine.Services.Auth;
+using school_electronic_magazine.Services.SchoolClass;
+using school_electronic_magazine.Services.Subject;
 using school_electronic_magazine.Services.Token;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -83,6 +87,11 @@ builder.Services.AddScoped<IGenericRepository<User>, GenericRepository<User>>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddSingleton<JwtSecurityTokenHandler>();
+builder.Services.AddScoped<ISchoolClassService, SchoolClassService>();
+builder.Services.AddScoped<ISchoolClassRepository, SchoolClassRepository>();
+
+builder.Services.AddScoped<ISubjectService, SubjectService>();
+builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
 
 // Временно для фронта
 builder.Services.AddCors(options =>

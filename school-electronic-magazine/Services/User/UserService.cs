@@ -112,8 +112,8 @@ public class UserService(
 
         var user = await geneticUserRepository
             .Query()
-            .Include(u => u.Roles)
-            .FirstOrDefaultAsync(u => u.Id == userId);
+            .Include(user => user.Roles)
+            .FirstOrDefaultAsync(user => user.Id == userId);
 
         if (user == null)
             throw new ArgumentException("Пользователь не найден");
@@ -125,11 +125,11 @@ public class UserService(
 
         foreach (var roleName in roles)
         {
-            var role = allRoles.FirstOrDefault(r => r.Name == roleName);
+            var role = allRoles.FirstOrDefault(role => role.Name == roleName);
             if (role == null)
                 throw new ArgumentException($"Роль '{roleName}' не найдена");
 
-            var existingRole = user.Roles.FirstOrDefault(r => r.Name == roleName);
+            var existingRole = user.Roles.FirstOrDefault(role => role.Name == roleName);
             if (existingRole == null)
                 throw new InvalidOperationException($"У пользователя нет роли '{roleName}'");
 
