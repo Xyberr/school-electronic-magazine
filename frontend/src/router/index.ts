@@ -33,7 +33,7 @@ router.beforeEach((to) => {
   const expired = decoded.exp * 1000 < Date.now()
   if (expired) {
     localStorage.removeItem('token')
-    return '/login'
+    return '/login?reason=expired'
   }
 })
 

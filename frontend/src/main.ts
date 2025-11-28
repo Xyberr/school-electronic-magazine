@@ -1,7 +1,6 @@
 import { createApp } from 'vue'
 import type { Plugin } from 'vue'
 import PrimeVueConfig from 'primevue/config'
-import PrimeVue from 'primevue/config'
 import Aura from '@primevue/themes/aura'
 
 import App from './App.vue'
