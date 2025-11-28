@@ -79,7 +79,7 @@ const onBtnLogin = async () => {
 <template>
   <Card class="loginForm">
     <template #content>
-      <div class="formContent">
+      <form class="formContent" @submit.prevent="onBtnLogin">
         <h1>Login Form</h1>
 
         <InputText type="text" placeholder="Login" v-model="login" :invalid="!!loginError" />
@@ -92,12 +92,12 @@ const onBtnLogin = async () => {
 
         <p v-if="serverError" class="error">{{ serverError }}</p>
 
-        <Button label="Log in" class="loginButton" @click="onBtnLogin" />
+        <Button label="Log in" class="loginButton" type="submit"/>
 
         <!-- <RouterLink to="/" class="link">
           Forgot password?
         </RouterLink> -->
-      </div>
+      </form>
     </template>
   </Card>
 </template>
