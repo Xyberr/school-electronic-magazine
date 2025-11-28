@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using school_electronic_magazine.DTO.Requests;
 using school_electronic_magazine.Repositories.SchoolClass;
 using school_electronic_magazine.Services.Auth;
+using school_electronic_magazine.Services.Group;
 using school_electronic_magazine.Services.SchoolClass;
 using school_electronic_magazine.Services.Subject;
 
@@ -15,7 +16,7 @@ namespace school_electronic_magazine.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AdminController(IUserService userService, ISchoolClassService schoolClassService, ISubjectService subjectService) : ControllerBase
+public class AdminController(IUserService userService, ISchoolClassService schoolClassService, ISubjectService subjectService, IGroupService groupService) : ControllerBase
 {
     [HttpPost("addRoles/{userId}")]
     [Authorize(Roles = "Admin")]
@@ -72,5 +73,44 @@ public class AdminController(IUserService userService, ISchoolClassService schoo
         await subjectService.AddSubjectAsync(subjectRequestPayload);
         return NoContent();
     }
+
+    [HttpPost("updateSubject{SubjectId}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UpdateSubject(long SubjectId, [FromBody] SubjectRequestPayload subjectRequestPayload)
+    {
+        await subjectService.UpdateSubjectAsync(SubjectId, subjectRequestPayload);
+        return NoContent();
+    }
+
+    [HttpPost("removeSubject/{subjectId}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> RemoveSubject(long SubjectId)
+    {
+        subjectService.DeleteSubjectAsync(SubjectId);
+        return NoContent();
+    }
     
+    [HttpPost("addGroup")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> AddGroup([FromBody] GroupRequestPayload payload)
+    {
+        await groupService.AddGroupAsync(payload);
+        return NoContent();
+    }
+
+    [HttpPut("updateGroup/{groupId}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UpdateGroup(long groupId, [FromBody] GroupRequestPayload payload)
+    {
+        await groupService.UpdateGroupAsync(groupId, payload);
+        return NoContent();
+    }
+
+    [HttpDelete("deleteGroup/{groupId}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> DeleteGroup(long groupId)
+    {
+        await groupService.DeleteGroupAsync(groupId);
+        return NoContent();
+    }
 }
