@@ -3,17 +3,11 @@ import Card from 'primevue/card';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import Password from 'primevue/password';
-import { useRouter } from 'vue-router';
 import { ref } from 'vue';
-import { useUserStore } from '@/stores/userStore';
-import { postApiAuthLogin } from '@/heyapi';
 import * as z from "zod";
+import { useUserStore } from '@/stores/userStore';
 
-interface loginData {
-  token: string,
-  refreshToken: string,
-  role: []
-}
+const userStore = useUserStore();
 
 const UserScheme = z.object({
   login: z
@@ -28,8 +22,6 @@ const UserScheme = z.object({
 
 const login = ref("")
 const password = ref("")
-const { logIn } = useUserStore()
-const router = useRouter()
 
 const loginError = ref("")
 const passwordError = ref("")
@@ -56,20 +48,10 @@ const onBtnLogin = async () => {
 
   // sending req if fields are fine
   try {
-    const res = await postApiAuthLogin({
-      body: {
-        login: login.value,
-        password: password.value
-      }
-    })
-
-    if (res.response.status === 200) {
-      const data = res.data as loginData
-      logIn(login.value, data.token)
-      router.push('/private')
-    } else {
-      serverError.value = `Server error: ${res.response.status}`
-    }
+    await userStore.loginAsync(0, {
+      login: login.value,
+      password: password.value
+    });
   } catch (error) {
     serverError.value = `Server error: ${error}`
   }

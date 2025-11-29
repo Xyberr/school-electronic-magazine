@@ -1,18 +1,53 @@
-import { ref } from 'vue'
-import { createGlobalState } from '@vueuse/core'
+import { computed, reactive, watch } from "vue";
+import { createGlobalState, useAsyncState, useLocalStorage } from "@vueuse/core";
+import { getJwtPayload } from "@/utils/jwt";
+import { postApiAuthLogin } from "@/heyapi";
+import { useRouter } from "vue-router";
+import type { LoginData, UserCredentials } from "@/types/auth";
 
 export const useUserStore = createGlobalState(() => {
-  let user = ref<any>(null)
+  const token = useLocalStorage<string | null>("token", null)
+  const router = useRouter()
 
-  function logIn(newUser: any, token: any) {
-    user.value = newUser
-    localStorage.setItem('token', token)
-  }
+  const jwtPayload = computed(() => getJwtPayload(token.value))
+
+  watch(token, () => {
+    if (!token.value) logOut()
+  },
+  { 
+    immediate: true 
+  });
+
+  const { isLoading: isLoginLoading, execute: loginAsync } = useAsyncState(
+  (credentials: UserCredentials) => postApiAuthLogin({
+    body: {
+      login: credentials.login,
+      password: credentials.password
+    }
+  }),
+  null,
+    {
+      resetOnExecute: false,
+      shallow: false,
+      immediate: false,
+      throwError: true,
+      onSuccess(res) {
+        const data = res?.data as LoginData
+        token.value = data.token
+        router.push("/private");
+      },
+    },
+  )
 
   function logOut() {
-    user.value = null
-    localStorage.removeItem('token')
+    token.value = null
   }
 
-  return { user, logIn, logOut }
-})
+  return reactive({
+    token,
+    jwtPayload,
+    isLoginLoading,
+    loginAsync,
+    logOut,
+  })
+});

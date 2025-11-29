@@ -1,3 +1,5 @@
+import type { TokenPayload } from '@/types/auth'
+import { jwtDecode } from 'jwt-decode'
 import { createRouter, createWebHistory } from 'vue-router'
 import { routes, handleHotUpdate } from 'vue-router/auto-routes'
 
@@ -24,7 +26,7 @@ router.beforeEach((to) => {
 
   let decoded
   try {
-    decoded = JSON.parse(atob(token.split('.')[1] as string))
+    decoded = jwtDecode<TokenPayload>(token)
   } catch (error) {
     localStorage.removeItem('token')
     return '/login'

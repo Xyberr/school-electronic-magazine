@@ -17,6 +17,7 @@
   "dependencies": {
     "@primevue/themes": "^4.3.9",
     "@vueuse/core": "^14.0.0",
+    "jwt-decode": "^4.0.0",
     "primevue": "^4.3.9",
     "vue": "^3.5.18",
     "vue-router": "^4.5.1",
