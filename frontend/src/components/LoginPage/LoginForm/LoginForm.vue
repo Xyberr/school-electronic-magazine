@@ -64,17 +64,17 @@ const onBtnLogin = async () => {
       <form class="formContent" @submit.prevent="onBtnLogin">
         <h1>Login Form</h1>
 
-        <InputText type="text" placeholder="Login" v-model="login" :invalid="!!loginError" />
+        <InputText type="text" placeholder="Login" v-model="login" :invalid="!!loginError" :disabled="userStore.isLoginLoading"/>
 
         <p v-if="loginError" class="error">{{ loginError }}</p>
 
-        <Password :feedback="false" toggleMask placeholder="Password" v-model="password" :invalid="!!passwordError" />
+        <Password :feedback="false" toggleMask placeholder="Password" v-model="password" :invalid="!!passwordError" :disabled="userStore.isLoginLoading"/>
 
         <p v-if="passwordError" class="error">{{ passwordError }}</p>
 
         <p v-if="serverError" class="error">{{ serverError }}</p>
 
-        <Button label="Log in" class="loginButton" type="submit"/>
+        <Button label="Log in" class="loginButton" type="submit" :disabled="userStore.isLoginLoading" />
 
         <!-- <RouterLink to="/" class="link">
           Forgot password?
