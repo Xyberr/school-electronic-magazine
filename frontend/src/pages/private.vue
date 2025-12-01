@@ -7,7 +7,7 @@ const router = useRouter()
 
 const onLogOut = () => {
   logOut()
-  router.push('/')
+  router.push('/login')
 }
 
 definePage({

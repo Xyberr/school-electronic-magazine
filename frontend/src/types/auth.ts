@@ -15,5 +15,5 @@ export interface UserCredentials {
 export interface LoginData {
   token: string,
   refreshToken: string,
-  role: []
+  role: string[]
 }

@@ -11,13 +11,6 @@ export const useUserStore = createGlobalState(() => {
 
   const jwtPayload = computed(() => getJwtPayload(token.value))
 
-  watch(token, () => {
-    if (!token.value) logOut()
-  },
-  { 
-    immediate: true 
-  });
-
   const { isLoading: isLoginLoading, execute: loginAsync } = useAsyncState(
   (credentials: UserCredentials) => postApiAuthLogin({
     body: {
@@ -41,7 +34,15 @@ export const useUserStore = createGlobalState(() => {
 
   function logOut() {
     token.value = null
+    router.push('/login')
   }
+
+  watch(token, () => {
+    if (!token.value) logOut();
+  },
+  {
+    immediate: true,
+  });
 
   return reactive({
     token,
