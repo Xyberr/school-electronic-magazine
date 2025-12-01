@@ -26,6 +26,11 @@ export const useUserStore = createGlobalState(() => {
       throwError: true,
       onSuccess(res) {
         const data = res?.data as LoginData
+
+        if (!data || !data.token) {
+          throw new Error("Invalid login or password");
+        }
+
         token.value = data.token
         router.push("/private");
       },

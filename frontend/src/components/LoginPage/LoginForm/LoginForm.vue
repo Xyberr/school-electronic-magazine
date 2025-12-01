@@ -53,7 +53,21 @@ const onBtnLogin = async () => {
       password: password.value
     });
   } catch (error) {
-    serverError.value = `Server error: ${error}`
+    let message = "Unknown error"
+
+    if (error instanceof Error) {
+      message = error.message
+    } else if (typeof error === "string") {
+      message = error
+    } else {
+      try {
+        message = JSON.stringify(error)
+      } catch {
+        message = String(error)
+      }
+    }
+
+    serverError.value = `${message}`
   }
 }
 </script>
