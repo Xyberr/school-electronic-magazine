@@ -4,6 +4,7 @@ using school_electronic_magazine.DTO.Requests;
 using school_electronic_magazine.Repositories.SchoolClass;
 using school_electronic_magazine.Services.Auth;
 using school_electronic_magazine.Services.Group;
+using school_electronic_magazine.Services.Lesson;
 using school_electronic_magazine.Services.SchoolClass;
 using school_electronic_magazine.Services.Subject;
 
@@ -11,12 +12,12 @@ namespace school_electronic_magazine.Controllers;
 
 
 /*
- * Каждый эндпоинт позвращает 204 по прозьбе фронта
+ * Каждый эндпоинт позвращает 204 по просьбе фронта
  */
 
 [ApiController]
 [Route("api/[controller]")]
-public class AdminController(IUserService userService, ISchoolClassService schoolClassService, ISubjectService subjectService, IGroupService groupService) : ControllerBase
+public class AdminController(IUserService userService, ISchoolClassService schoolClassService, ISubjectService subjectService, IGroupService groupService, ILessonService lessonService) : ControllerBase
 {
     [HttpPost("addRoles/{userId}")]
     [Authorize(Roles = "Admin")]
@@ -26,7 +27,7 @@ public class AdminController(IUserService userService, ISchoolClassService schoo
         return NoContent();
     }
 
-    [HttpPost("removeRoles/{userId}")]
+    [HttpDelete("removeRoles/{userId}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> RemoveRoles(long userId, List<string> roles)
     {
@@ -34,7 +35,7 @@ public class AdminController(IUserService userService, ISchoolClassService schoo
         return NoContent();
     }
 
-    [HttpPost("removeUserById/{userId}")]
+    [HttpDelete("removeUserById/{userId}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> RemoveUserByIdAsync(long userId)
     {
@@ -50,7 +51,7 @@ public class AdminController(IUserService userService, ISchoolClassService schoo
         return NoContent();
     }
 
-    [HttpPost("removeSchoolClass")]
+    [HttpDelete("removeSchoolClass/{SchoolClassId}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> RemoveSchoolClass(long SchoolClassId)
     {
@@ -58,7 +59,7 @@ public class AdminController(IUserService userService, ISchoolClassService schoo
         return NoContent();
     }
 
-    [HttpPost("updateSchoolClass")]
+    [HttpPatch("updateSchoolClass/{SchoolClassId}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateSchoolClass(long SchoolClassId, [FromBody]SchoolClassRequestPayload schoolClassRequestPayload)
     {
@@ -74,7 +75,7 @@ public class AdminController(IUserService userService, ISchoolClassService schoo
         return NoContent();
     }
 
-    [HttpPost("updateSubject{SubjectId}")]
+    [HttpPatch("updateSubject{SubjectId}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateSubject(long SubjectId, [FromBody] SubjectRequestPayload subjectRequestPayload)
     {
@@ -82,7 +83,7 @@ public class AdminController(IUserService userService, ISchoolClassService schoo
         return NoContent();
     }
 
-    [HttpPost("removeSubject/{subjectId}")]
+    [HttpDelete("removeSubject/{subjectId}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> RemoveSubject(long SubjectId)
     {
@@ -98,7 +99,7 @@ public class AdminController(IUserService userService, ISchoolClassService schoo
         return NoContent();
     }
 
-    [HttpPut("updateGroup/{groupId}")]
+    [HttpPatch("updateGroup/{groupId}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateGroup(long groupId, [FromBody] GroupRequestPayload payload)
     {
@@ -113,4 +114,30 @@ public class AdminController(IUserService userService, ISchoolClassService schoo
         await groupService.DeleteGroupAsync(groupId);
         return NoContent();
     }
+
+    [HttpPost("AddLesson")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> AddLesson(LessonRequestPayload payload)
+    {
+        await lessonService.AddLessonAsync(payload);
+        return NoContent();
+    }
+
+    [HttpDelete("RemoveLesson/{lessonId}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> RemoveLesson(long lessonId)
+    {
+        await lessonService.DeleteLessonAsync(lessonId);
+        return NoContent();
+    }
+
+    [HttpPost("updateLesson/{lessonId}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UpdateLesson(long lessonId,LessonRequestPayload payload)
+    {
+        await lessonService.UpdateLessonAsync(lessonId, payload);
+        return NoContent();
+    }
+    
+    
 }
