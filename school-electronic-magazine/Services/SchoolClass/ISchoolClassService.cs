@@ -9,5 +9,5 @@ public interface ISchoolClassService
     Task CreateSchoolClassAsync(SchoolClassRequestPayload schoolClassRequestPayload);
     Task RemoveSchoolClassAsync(long schoolClassId);
     Task UpdateSchoolClass(long SchoolClassId,SchoolClassRequestPayload schoolClassRequestPayload);
-    Task<Models.SchoolClass> GetSchoolClassAsync(long schoolClassId);
+    Task<Models.SchoolClass> GetSchoolClassByIdAsync(long schoolClassId);
 }

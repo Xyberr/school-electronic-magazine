@@ -143,5 +143,6 @@ public class UserService(
     public async Task RemoveUserByIdAsync(long userId)
     {
         await geneticUserRepository.DeleteAsync(userId);
+        await geneticUserRepository.SaveChangesAsync();
     }
 }

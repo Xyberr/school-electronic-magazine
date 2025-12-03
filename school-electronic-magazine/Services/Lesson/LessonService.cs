@@ -12,7 +12,9 @@ public class LessonService(IGenericRepository<Models.Lesson> genericRepository) 
             LessonDate = payload.LessonDate,
             ClassRoom = payload.ClassRoom,
             Title = payload.Title,
-            CreationDate = DateTime.Now
+            TeacherId = payload.TeacherId,
+            SubjectId = payload.SubjectId,
+            CreationDate = DateTime.UtcNow,
         };
 
         await genericRepository.AddAsync(lesson);
@@ -31,6 +33,7 @@ public class LessonService(IGenericRepository<Models.Lesson> genericRepository) 
        lesson.LessonDate = payload.LessonDate;
         
        await genericRepository.UpdateAsync(lesson);
+       await genericRepository.SaveChangesAsync();
        
     }
 

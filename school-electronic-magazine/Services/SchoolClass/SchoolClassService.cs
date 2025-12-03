@@ -21,6 +21,7 @@ public class SchoolClassService(IGenericRepository<Models.SchoolClass> genericSc
         };
 
         await genericSchoolClassRepository.AddAsync(SchoolClass);
+        await genericSchoolClassRepository.SaveChangesAsync();
     }
 
     public async Task RemoveSchoolClassAsync(long schoolClassId)
@@ -29,6 +30,8 @@ public class SchoolClassService(IGenericRepository<Models.SchoolClass> genericSc
             throw new ArgumentOutOfRangeException(nameof(schoolClassId));
         
         await genericSchoolClassRepository.DeleteAsync(schoolClassId);
+        await genericSchoolClassRepository.SaveChangesAsync();
+
     }
 
     public async Task UpdateSchoolClass(long SchoolClassId, SchoolClassRequestPayload schoolClassRequestPayload)
@@ -47,10 +50,14 @@ public class SchoolClassService(IGenericRepository<Models.SchoolClass> genericSc
         
         
         await genericSchoolClassRepository.UpdateAsync(SchoolClass);
+        await genericSchoolClassRepository.SaveChangesAsync();
+
     }
 
-    public async Task<Models.SchoolClass> GetSchoolClassAsync(long schoolClassId)
+    public async Task<Models.SchoolClass> GetSchoolClassByIdAsync(long schoolClassId)
     {
+         await genericSchoolClassRepository.GetByIdAsync(schoolClassId);
+        await genericSchoolClassRepository.SaveChangesAsync();
         return await genericSchoolClassRepository.GetByIdAsync(schoolClassId);
     }
 }

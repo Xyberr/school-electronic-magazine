@@ -8,10 +8,14 @@ using Microsoft.OpenApi.Models;
 using school_electronic_magazine.Data;
 using school_electronic_magazine.Models;
 using school_electronic_magazine.Repositories;
+using school_electronic_magazine.Repositories.Group;
 using school_electronic_magazine.Repositories.SchoolClass;
 using school_electronic_magazine.Repositories.Subject;
 using school_electronic_magazine.Repositories.Users;
 using school_electronic_magazine.Services.Auth;
+using school_electronic_magazine.Services.Grade;
+using school_electronic_magazine.Services.Group;
+using school_electronic_magazine.Services.Lesson;
 using school_electronic_magazine.Services.SchoolClass;
 using school_electronic_magazine.Services.Subject;
 using school_electronic_magazine.Services.Token;
@@ -89,9 +93,13 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddSingleton<JwtSecurityTokenHandler>();
 builder.Services.AddScoped<ISchoolClassService, SchoolClassService>();
 builder.Services.AddScoped<ISchoolClassRepository, SchoolClassRepository>();
-
+builder.Services.AddScoped<IGroupService, GroupService>();
+builder.Services.AddScoped<IGroupRepository, GroupRepository>();
 builder.Services.AddScoped<ISubjectService, SubjectService>();
 builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
+builder.Services.AddScoped<ILessonService, LessonService>();
+builder.Services.AddScoped<IGradeService, GradeService>();
+
 
 // Временно для фронта
 builder.Services.AddCors(options =>

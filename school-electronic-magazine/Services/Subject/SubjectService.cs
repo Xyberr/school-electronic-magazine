@@ -26,7 +26,8 @@ public class SubjectService : ISubjectService
             Name = payload.Name,
             TeacherId = null,
             Lesson = null,
-            CreationDate = DateTime.Now,
+            CreationDate = DateTime.UtcNow,
+
         };
 
         await _subjectRepository.AddAsync(subject);

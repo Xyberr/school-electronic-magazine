@@ -12,7 +12,7 @@ public class GradeService(IGenericRepository<Models.Grade> repository) : IGradeS
 
         var grade = new Models.Grade
         {
-            CreationDate = DateTime.Now,
+            CreationDate = DateTime.UtcNow,
             StudentId = payload.StudentId,
             SchoolClassId = payload.SchoolClassId,
             LessonId = payload.LessonId,
@@ -36,6 +36,7 @@ public class GradeService(IGenericRepository<Models.Grade> repository) : IGradeS
         grade.LessonId = payload.LessonId;
 
         await repository.UpdateAsync(grade);
+        await repository.SaveChangesAsync();
     }
 
     public async Task DeleteGradeAsync(long gradeId)
@@ -44,5 +45,6 @@ public class GradeService(IGenericRepository<Models.Grade> repository) : IGradeS
             throw new ArgumentNullException("id не может быть null");
         
         await repository.DeleteAsync(gradeId);
+        await repository.SaveChangesAsync();
     }
 }
