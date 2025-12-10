@@ -24,7 +24,6 @@ public class SubjectService : ISubjectService
         var subject = new Models.Subject
         {
             Name = payload.Name,
-            TeacherId = null,
             Lesson = null,
             CreationDate = DateTime.UtcNow,
 

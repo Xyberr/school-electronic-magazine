@@ -12,7 +12,7 @@ using school_electronic_magazine.Data;
 namespace school_electronic_magazine.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251103143929_InitialCreate")]
+    [Migration("20251210163915_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -27,17 +27,17 @@ namespace school_electronic_magazine.Migrations
 
             modelBuilder.Entity("LessonSchoolClass", b =>
                 {
-                    b.Property<long>("LessonId")
+                    b.Property<long>("LessonsId")
                         .HasColumnType("bigint");
 
                     b.Property<long>("SchoolClassId")
                         .HasColumnType("bigint");
 
-                    b.HasKey("LessonId", "SchoolClassId");
+                    b.HasKey("LessonsId", "SchoolClassId");
 
                     b.HasIndex("SchoolClassId");
 
-                    b.ToTable("LessonSchoolClass", (string)null);
+                    b.ToTable("LessonSchoolClass");
                 });
 
             modelBuilder.Entity("RoleUser", b =>
@@ -57,17 +57,17 @@ namespace school_electronic_magazine.Migrations
 
             modelBuilder.Entity("SubjectUser", b =>
                 {
-                    b.Property<long>("SubjectsId")
+                    b.Property<long>("TeacherSubjectsId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("TeacherIdId")
+                    b.Property<long>("TeachersId")
                         .HasColumnType("bigint");
 
-                    b.HasKey("SubjectsId", "TeacherIdId");
+                    b.HasKey("TeacherSubjectsId", "TeachersId");
 
-                    b.HasIndex("TeacherIdId");
+                    b.HasIndex("TeachersId");
 
-                    b.ToTable("TeacherSubjects", (string)null);
+                    b.ToTable("SubjectUser");
                 });
 
             modelBuilder.Entity("school_electronic_magazine.Models.ContactInfo", b =>
@@ -168,12 +168,7 @@ namespace school_electronic_magazine.Migrations
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<long>("StudentId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("StudentId");
 
                     b.ToTable("Group");
                 });
@@ -222,6 +217,34 @@ namespace school_electronic_magazine.Migrations
                     b.ToTable("Lesson");
                 });
 
+            modelBuilder.Entity("school_electronic_magazine.Models.RefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshToken");
+                });
+
             modelBuilder.Entity("school_electronic_magazine.Models.Role", b =>
                 {
                     b.Property<long>("Id")
@@ -254,26 +277,28 @@ namespace school_electronic_magazine.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<long>("ClassId")
+                        .HasColumnType("bigint");
+
                     b.Property<int>("ClassNumber")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("EducationShift")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("EnterDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<long>("GroupId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("GroupLabel")
+                    b.Property<string>("GroupLetter")
                         .IsRequired()
-                        .HasMaxLength(1)
-                        .HasColumnType("character varying(1)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GroupId");
+                    b.HasIndex("ClassId");
 
                     b.ToTable("SchoolClasses");
                 });
@@ -306,9 +331,6 @@ namespace school_electronic_magazine.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<long>("ClassId")
-                        .HasColumnType("bigint");
-
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -336,14 +358,31 @@ namespace school_electronic_magazine.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("users");
+                    b.ToTable("Users", (string)null);
+
+                    b.UseTptMappingStrategy();
+                });
+
+            modelBuilder.Entity("school_electronic_magazine.Models.Student", b =>
+                {
+                    b.HasBaseType("school_electronic_magazine.Models.User");
+
+                    b.Property<DateTime>("EnterDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("GroupId")
+                        .HasColumnType("bigint");
+
+                    b.HasIndex("GroupId");
+
+                    b.ToTable("Students", (string)null);
                 });
 
             modelBuilder.Entity("LessonSchoolClass", b =>
                 {
                     b.HasOne("school_electronic_magazine.Models.Lesson", null)
                         .WithMany()
-                        .HasForeignKey("LessonId")
+                        .HasForeignKey("LessonsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -373,13 +412,13 @@ namespace school_electronic_magazine.Migrations
                 {
                     b.HasOne("school_electronic_magazine.Models.Subject", null)
                         .WithMany()
-                        .HasForeignKey("SubjectsId")
+                        .HasForeignKey("TeacherSubjectsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("school_electronic_magazine.Models.User", null)
                         .WithMany()
-                        .HasForeignKey("TeacherIdId")
+                        .HasForeignKey("TeachersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -406,7 +445,7 @@ namespace school_electronic_magazine.Migrations
             modelBuilder.Entity("school_electronic_magazine.Models.Grade", b =>
                 {
                     b.HasOne("school_electronic_magazine.Models.SchoolClass", "SchoolClass")
-                        .WithMany("Grade")
+                        .WithMany("Grades")
                         .HasForeignKey("SchoolClassId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -418,17 +457,6 @@ namespace school_electronic_magazine.Migrations
                         .IsRequired();
 
                     b.Navigation("SchoolClass");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("school_electronic_magazine.Models.Group", b =>
-                {
-                    b.HasOne("school_electronic_magazine.Models.User", "User")
-                        .WithMany("Groups")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -448,11 +476,39 @@ namespace school_electronic_magazine.Migrations
                     b.Navigation("Subject");
                 });
 
+            modelBuilder.Entity("school_electronic_magazine.Models.RefreshToken", b =>
+                {
+                    b.HasOne("school_electronic_magazine.Models.User", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("school_electronic_magazine.Models.SchoolClass", b =>
                 {
                     b.HasOne("school_electronic_magazine.Models.Group", "Group")
                         .WithMany("SchoolClasses")
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+                });
+
+            modelBuilder.Entity("school_electronic_magazine.Models.Student", b =>
+                {
+                    b.HasOne("school_electronic_magazine.Models.Group", "Group")
+                        .WithMany("Students")
                         .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("school_electronic_magazine.Models.User", null)
+                        .WithOne()
+                        .HasForeignKey("school_electronic_magazine.Models.Student", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -467,11 +523,13 @@ namespace school_electronic_magazine.Migrations
             modelBuilder.Entity("school_electronic_magazine.Models.Group", b =>
                 {
                     b.Navigation("SchoolClasses");
+
+                    b.Navigation("Students");
                 });
 
             modelBuilder.Entity("school_electronic_magazine.Models.SchoolClass", b =>
                 {
-                    b.Navigation("Grade");
+                    b.Navigation("Grades");
                 });
 
             modelBuilder.Entity("school_electronic_magazine.Models.Subject", b =>
@@ -485,9 +543,9 @@ namespace school_electronic_magazine.Migrations
 
                     b.Navigation("Grades");
 
-                    b.Navigation("Groups");
-
                     b.Navigation("Lessons");
+
+                    b.Navigation("RefreshTokens");
                 });
 #pragma warning restore 612, 618
         }

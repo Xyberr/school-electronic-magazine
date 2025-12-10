@@ -15,7 +15,9 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Базовая таблица для User
         modelBuilder.Entity<User>()
+            .ToTable("Users") // таблица для базового класса
             .HasMany(u => u.Roles)
             .WithMany(r => r.Users)
             .UsingEntity(j => j.ToTable("UserRoles"));
@@ -26,37 +28,24 @@ public class AppDbContext : DbContext
             .HasForeignKey(ci => ci.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<User>()
-            .HasMany(u => u.Grades)
-            .WithOne(g => g.User)
-            .HasForeignKey(ci => ci.StudentId)
+        // Таблица для наследника Student
+        modelBuilder.Entity<Student>()
+            .ToTable("Students") // отдельная таблица для наследника
+            .HasOne(s => s.Group)
+            .WithMany(g => g.Students)
+            .HasForeignKey(s => s.GroupId)
             .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<User>()
-            .HasMany(u => u.Groups)
-            .WithOne(g => g.User)
-            .HasForeignKey(g => g.StudentId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<SchoolClass>()
-            .HasMany(u => u.Lesson)
-            .WithMany(sc => sc.SchoolClass)
-            .UsingEntity(j => j.ToTable("LessonSchoolClass"));
-
-        modelBuilder.Entity<User>()
-            .HasMany(u => u.Subjects)
-            .WithMany(s => s.TeacherId)
-            .UsingEntity(j => j.ToTable("TeacherSubjects"));
 
         modelBuilder.Entity<SchoolClass>()
             .HasOne(sc => sc.Group)
             .WithMany(g => g.SchoolClasses)
-            .HasForeignKey(sc => sc.GroupId);
+            .HasForeignKey(sc => sc.ClassId);
 
         modelBuilder.Entity<Grade>()
-            .HasOne(g => g.SchoolClass)
-            .WithMany(sc => sc.Grade)
-            .HasForeignKey(g => g.SchoolClassId);
+            .HasOne(g => g.User)
+            .WithMany(u => u.Grades)
+            .HasForeignKey(g => g.StudentId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Lesson>()
             .HasOne(l => l.Subject)

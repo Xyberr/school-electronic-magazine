@@ -17,6 +17,7 @@ namespace school_electronic_magazine.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin")]
 public class AdminController(IUserService userService, ISchoolClassService schoolClassService, ISubjectService subjectService, IGroupService groupService, ILessonService lessonService) : ControllerBase
 {
     [HttpPost("addRoles/{userId}")]

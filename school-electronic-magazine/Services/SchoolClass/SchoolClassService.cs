@@ -13,9 +13,8 @@ public class SchoolClassService(IGenericRepository<Models.SchoolClass> genericSc
         
         var SchoolClass = new Models.SchoolClass
         {
-            GroupLabel = schoolClassRequestPayload.GroupLabel,
+            GroupLetter = schoolClassRequestPayload.GroupLabel,
             ClassNumber = schoolClassRequestPayload.ClassNumber,
-            GroupId = schoolClassRequestPayload.GroupId,
             EnterDate = schoolClassRequestPayload.EnterDate,
             CreationDate = DateTime.UtcNow
         };
@@ -43,10 +42,9 @@ public class SchoolClassService(IGenericRepository<Models.SchoolClass> genericSc
         if(SchoolClass == null)
             throw new InvalidOperationException($"School class with id {SchoolClassId} not found");
         
-        SchoolClass.GroupLabel = schoolClassRequestPayload.GroupLabel;
+        SchoolClass.GroupLetter = schoolClassRequestPayload.GroupLabel;
         SchoolClass.ClassNumber = schoolClassRequestPayload.ClassNumber;
         SchoolClass.EnterDate = schoolClassRequestPayload.EnterDate;
-        SchoolClass.GroupId = schoolClassRequestPayload.GroupId;
         
         
         await genericSchoolClassRepository.UpdateAsync(SchoolClass);

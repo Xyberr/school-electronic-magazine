@@ -1,8 +1,8 @@
 ﻿namespace school_electronic_magazine.DTO.Requests;
 
-public class GradeRequestPayload
+public record GradeRequestPayload
 {
-    public long StudentId { get; set; }
+    public long StudentId { get; init; }
     
     public long SchoolClassId { get; set; }
     

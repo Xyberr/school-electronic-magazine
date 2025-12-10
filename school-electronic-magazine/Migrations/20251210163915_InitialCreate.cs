@@ -27,6 +27,20 @@ namespace school_electronic_magazine.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Group",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ClassId = table.Column<long>(type: "bigint", nullable: false),
+                    CreationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Group", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Role",
                 columns: table => new
                 {
@@ -56,7 +70,7 @@ namespace school_electronic_magazine.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "users",
+                name: "Users",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
@@ -67,12 +81,35 @@ namespace school_electronic_magazine.Migrations
                     LastOnline = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     PasswordHash = table.Column<string>(type: "text", nullable: false),
                     Login = table.Column<string>(type: "text", nullable: false),
+                    CreationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SchoolClasses",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    GroupLetter = table.Column<string>(type: "text", nullable: false),
+                    ClassNumber = table.Column<int>(type: "integer", nullable: false),
+                    EducationShift = table.Column<int>(type: "integer", nullable: false),
+                    EnterDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ClassId = table.Column<long>(type: "bigint", nullable: false),
                     CreationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_users", x => x.Id);
+                    table.PrimaryKey("PK_SchoolClasses", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SchoolClasses_Group_ClassId",
+                        column: x => x.ClassId,
+                        principalTable: "Group",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -96,30 +133,9 @@ namespace school_electronic_magazine.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ContactInfo_users_UserId",
+                        name: "FK_ContactInfo_Users_UserId",
                         column: x => x.UserId,
-                        principalTable: "users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Group",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ClassId = table.Column<long>(type: "bigint", nullable: false),
-                    StudentId = table.Column<long>(type: "bigint", nullable: false),
-                    CreationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Group", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Group_users_StudentId",
-                        column: x => x.StudentId,
-                        principalTable: "users",
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -149,32 +165,79 @@ namespace school_electronic_magazine.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Lesson_users_UserId",
+                        name: "FK_Lesson_Users_UserId",
                         column: x => x.UserId,
-                        principalTable: "users",
+                        principalTable: "Users",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "TeacherSubjects",
+                name: "RefreshToken",
                 columns: table => new
                 {
-                    SubjectsId = table.Column<long>(type: "bigint", nullable: false),
-                    TeacherIdId = table.Column<long>(type: "bigint", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    Token = table.Column<string>(type: "text", nullable: false),
+                    ExpiryDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsRevoked = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TeacherSubjects", x => new { x.SubjectsId, x.TeacherIdId });
+                    table.PrimaryKey("PK_RefreshToken", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TeacherSubjects_Subject_SubjectsId",
-                        column: x => x.SubjectsId,
+                        name: "FK_RefreshToken_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Students",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false),
+                    GroupId = table.Column<long>(type: "bigint", nullable: false),
+                    EnterDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Students", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Students_Group_GroupId",
+                        column: x => x.GroupId,
+                        principalTable: "Group",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Students_Users_Id",
+                        column: x => x.Id,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SubjectUser",
+                columns: table => new
+                {
+                    TeacherSubjectsId = table.Column<long>(type: "bigint", nullable: false),
+                    TeachersId = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SubjectUser", x => new { x.TeacherSubjectsId, x.TeachersId });
+                    table.ForeignKey(
+                        name: "FK_SubjectUser_Subject_TeacherSubjectsId",
+                        column: x => x.TeacherSubjectsId,
                         principalTable: "Subject",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_TeacherSubjects_users_TeacherIdId",
-                        column: x => x.TeacherIdId,
-                        principalTable: "users",
+                        name: "FK_SubjectUser_Users_TeachersId",
+                        column: x => x.TeachersId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -196,32 +259,9 @@ namespace school_electronic_magazine.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserRoles_users_UsersId",
+                        name: "FK_UserRoles_Users_UsersId",
                         column: x => x.UsersId,
-                        principalTable: "users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "SchoolClasses",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    GroupLabel = table.Column<string>(type: "character varying(1)", maxLength: 1, nullable: false),
-                    ClassNumber = table.Column<int>(type: "integer", nullable: false),
-                    GroupId = table.Column<long>(type: "bigint", nullable: false),
-                    EnterDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SchoolClasses", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_SchoolClasses_Group_GroupId",
-                        column: x => x.GroupId,
-                        principalTable: "Group",
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -248,9 +288,9 @@ namespace school_electronic_magazine.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Grade_users_StudentId",
+                        name: "FK_Grade_Users_StudentId",
                         column: x => x.StudentId,
-                        principalTable: "users",
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -259,15 +299,15 @@ namespace school_electronic_magazine.Migrations
                 name: "LessonSchoolClass",
                 columns: table => new
                 {
-                    LessonId = table.Column<long>(type: "bigint", nullable: false),
+                    LessonsId = table.Column<long>(type: "bigint", nullable: false),
                     SchoolClassId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LessonSchoolClass", x => new { x.LessonId, x.SchoolClassId });
+                    table.PrimaryKey("PK_LessonSchoolClass", x => new { x.LessonsId, x.SchoolClassId });
                     table.ForeignKey(
-                        name: "FK_LessonSchoolClass_Lesson_LessonId",
-                        column: x => x.LessonId,
+                        name: "FK_LessonSchoolClass_Lesson_LessonsId",
+                        column: x => x.LessonsId,
                         principalTable: "Lesson",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -300,11 +340,6 @@ namespace school_electronic_magazine.Migrations
                 column: "StudentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Group_StudentId",
-                table: "Group",
-                column: "StudentId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Lesson_SubjectId",
                 table: "Lesson",
                 column: "SubjectId");
@@ -320,14 +355,24 @@ namespace school_electronic_magazine.Migrations
                 column: "SchoolClassId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SchoolClasses_GroupId",
+                name: "IX_RefreshToken_UserId",
+                table: "RefreshToken",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SchoolClasses_ClassId",
                 table: "SchoolClasses",
+                column: "ClassId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Students_GroupId",
+                table: "Students",
                 column: "GroupId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TeacherSubjects_TeacherIdId",
-                table: "TeacherSubjects",
-                column: "TeacherIdId");
+                name: "IX_SubjectUser_TeachersId",
+                table: "SubjectUser",
+                column: "TeachersId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_UsersId",
@@ -348,7 +393,13 @@ namespace school_electronic_magazine.Migrations
                 name: "LessonSchoolClass");
 
             migrationBuilder.DropTable(
-                name: "TeacherSubjects");
+                name: "RefreshToken");
+
+            migrationBuilder.DropTable(
+                name: "Students");
+
+            migrationBuilder.DropTable(
+                name: "SubjectUser");
 
             migrationBuilder.DropTable(
                 name: "UserRoles");
@@ -369,10 +420,10 @@ namespace school_electronic_magazine.Migrations
                 name: "Subject");
 
             migrationBuilder.DropTable(
-                name: "Group");
+                name: "Users");
 
             migrationBuilder.DropTable(
-                name: "users");
+                name: "Group");
         }
     }
 }
