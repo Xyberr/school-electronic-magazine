@@ -15,9 +15,8 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Базовая таблица для User
         modelBuilder.Entity<User>()
-            .ToTable("Users") // таблица для базового класса
+            .ToTable("Users")
             .HasMany(u => u.Roles)
             .WithMany(r => r.Users)
             .UsingEntity(j => j.ToTable("UserRoles"));
@@ -27,10 +26,9 @@ public class AppDbContext : DbContext
             .WithOne(ci => ci.User)
             .HasForeignKey(ci => ci.UserId)
             .OnDelete(DeleteBehavior.Cascade);
-
-        // Таблица для наследника Student
+        
         modelBuilder.Entity<Student>()
-            .ToTable("Students") // отдельная таблица для наследника
+            .ToTable("Students")
             .HasOne(s => s.Group)
             .WithMany(g => g.Students)
             .HasForeignKey(s => s.GroupId)
@@ -48,10 +46,23 @@ public class AppDbContext : DbContext
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Lesson>()
+            .ToTable("Lessons")
             .HasOne(l => l.Subject)
             .WithMany(s => s.Lesson)
             .HasForeignKey(l => l.SubjectId)
             .IsRequired();
+
+        modelBuilder.Entity<Lesson>()
+            .HasOne(l => l.Student)
+            .WithMany() 
+            .HasForeignKey(l => l.StudentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Lesson>()
+            .HasOne(l => l.Teacher)
+            .WithMany()
+            .HasForeignKey(l => l.TeacherId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         base.OnModelCreating(modelBuilder);
     }
