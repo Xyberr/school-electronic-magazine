@@ -8,16 +8,7 @@ using Microsoft.OpenApi.Models;
 using school_electronic_magazine.Data;
 using school_electronic_magazine.Models;
 using school_electronic_magazine.Repositories;
-using school_electronic_magazine.Repositories.SchoolClass;
-using school_electronic_magazine.Repositories.Subject;
-using school_electronic_magazine.Repositories.Users;
-using school_electronic_magazine.Services.Auth;
-using school_electronic_magazine.Services.Grade;
-using school_electronic_magazine.Services.Group;
-using school_electronic_magazine.Services.Lesson;
-using school_electronic_magazine.Services.SchoolClass;
-using school_electronic_magazine.Services.Subject;
-using school_electronic_magazine.Services.Token;
+using school_electronic_magazine.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -2,7 +2,7 @@
 using school_electronic_magazine.DTO.Requests;
 using school_electronic_magazine.Repositories;
 
-namespace school_electronic_magazine.Services.SchoolClass;
+namespace school_electronic_magazine.Services;
 
 public class SchoolClassService(IGenericRepository<Models.SchoolClass> genericSchoolClassRepository) : ISchoolClassService
 {

@@ -1,18 +1,17 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using school_electronic_magazine.DTO.Requests;
-using school_electronic_magazine.Repositories.SchoolClass;
-using school_electronic_magazine.Services.Auth;
-using school_electronic_magazine.Services.Group;
-using school_electronic_magazine.Services.Lesson;
-using school_electronic_magazine.Services.SchoolClass;
-using school_electronic_magazine.Services.Subject;
+using school_electronic_magazine.Repositories;
+using school_electronic_magazine.Services;
+
 
 namespace school_electronic_magazine.Controllers;
 
 
 /*
  * Каждый эндпоинт позвращает 204 по просьбе фронта
+ *
+ * Так же фронт ещё раз сказал, что пока что, ему ничего не нужно, но не обещал в будущем, не потребует
  */
 
 [ApiController]
@@ -20,24 +19,21 @@ namespace school_electronic_magazine.Controllers;
 [Authorize(Roles = "Admin")]
 public class AdminController(IUserService userService, ISchoolClassService schoolClassService, ISubjectService subjectService, IGroupService groupService, ILessonService lessonService) : ControllerBase
 {
-    [HttpPost("addRoles/{userId}")]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> AddRoles([FromBody] List<string> roles, long userId)
+    [HttpPost("assignRolesAsyncRoles/{userId:long}")]
+    public async Task<IActionResult> AssignRolesAsyncRoles([FromBody] List<string> roles, long userId)
     {
-        await userService.AddRolesAsync(userId, roles);
+        await userService.AssignRolesAsync(userId, roles);
         return NoContent();
     }
 
-    [HttpDelete("removeRoles/{userId}")]
-    [Authorize(Roles = "Admin")]
+    [HttpDelete("removeRoles/{userId:long}")]
     public async Task<IActionResult> RemoveRoles(long userId, List<string> roles)
     {
         await userService.RemoveRolesAsync(userId, roles);
         return NoContent();
     }
 
-    [HttpDelete("removeUserById/{userId}")]
-    [Authorize(Roles = "Admin")]
+    [HttpDelete("removeUserById/{userId:long}")]
     public async Task<IActionResult> RemoveUserByIdAsync(long userId)
     {
         await userService.RemoveUserByIdAsync(userId);
@@ -45,23 +41,21 @@ public class AdminController(IUserService userService, ISchoolClassService schoo
     }
 
     [HttpPost("addSchoolClass")]
-    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> addSchoolClass(SchoolClassRequestPayload schoolClassRequestPayload)
     {
         await schoolClassService.CreateSchoolClassAsync(schoolClassRequestPayload);
         return NoContent();
     }
 
-    [HttpDelete("removeSchoolClass/{SchoolClassId}")]
-    [Authorize(Roles = "Admin")]
+    [HttpDelete("removeSchoolClass/{SchoolClassId:long}")]
     public async Task<IActionResult> RemoveSchoolClass(long SchoolClassId)
     {
         await schoolClassService.RemoveSchoolClassAsync(SchoolClassId);
         return NoContent();
     }
 
-    [HttpPatch("updateSchoolClass/{SchoolClassId}")]
-    [Authorize(Roles = "Admin")]
+    [HttpPatch("updateSchoolClass/{SchoolClassId:long}")]
+    [Authorize(Roles = "Admin, Teacher")]
     public async Task<IActionResult> UpdateSchoolClass(long SchoolClassId, [FromBody]SchoolClassRequestPayload schoolClassRequestPayload)
     {
         await schoolClassService.UpdateSchoolClass(SchoolClassId ,schoolClassRequestPayload);
@@ -69,23 +63,20 @@ public class AdminController(IUserService userService, ISchoolClassService schoo
     }
 
     [HttpPost("addSubject")]
-    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> AddSubject([FromBody] SubjectRequestPayload subjectRequestPayload)
     {
         await subjectService.AddSubjectAsync(subjectRequestPayload);
         return NoContent();
     }
 
-    [HttpPatch("updateSubject{SubjectId}")]
-    [Authorize(Roles = "Admin")]
+    [HttpPatch("updateSubject{SubjectId:long}")]
     public async Task<IActionResult> UpdateSubject(long SubjectId, [FromBody] SubjectRequestPayload subjectRequestPayload)
     {
         await subjectService.UpdateSubjectAsync(SubjectId, subjectRequestPayload);
         return NoContent();
     }
 
-    [HttpDelete("removeSubject/{subjectId}")]
-    [Authorize(Roles = "Admin")]
+    [HttpDelete("removeSubject/{subjectId:long}")]
     public async Task<IActionResult> RemoveSubject(long SubjectId)
     {
         subjectService.DeleteSubjectAsync(SubjectId);
@@ -93,23 +84,20 @@ public class AdminController(IUserService userService, ISchoolClassService schoo
     }
     
     [HttpPost("addGroup")]
-    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> AddGroup([FromBody] GroupRequestPayload payload)
     {
         await groupService.AddGroupAsync(payload);
         return NoContent();
     }
 
-    [HttpPatch("updateGroup/{groupId}")]
-    [Authorize(Roles = "Admin")]
+    [HttpPatch("updateGroup/{groupId:long}")]
     public async Task<IActionResult> UpdateGroup(long groupId, [FromBody] GroupRequestPayload payload)
     {
         await groupService.UpdateGroupAsync(groupId, payload);
         return NoContent();
     }
 
-    [HttpDelete("deleteGroup/{groupId}")]
-    [Authorize(Roles = "Admin")]
+    [HttpDelete("deleteGroup/{groupId:long}")]
     public async Task<IActionResult> DeleteGroup(long groupId)
     {
         await groupService.DeleteGroupAsync(groupId);
@@ -117,23 +105,20 @@ public class AdminController(IUserService userService, ISchoolClassService schoo
     }
 
     [HttpPost("AddLesson")]
-    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> AddLesson(LessonRequestPayload payload)
     {
         await lessonService.AddLessonAsync(payload);
         return NoContent();
     }
 
-    [HttpDelete("RemoveLesson/{lessonId}")]
-    [Authorize(Roles = "Admin")]
+    [HttpDelete("RemoveLesson/{lessonId:long}")] 
     public async Task<IActionResult> RemoveLesson(long lessonId)
     {
         await lessonService.DeleteLessonAsync(lessonId);
         return NoContent();
     }
 
-    [HttpPost("updateLesson/{lessonId}")]
-    [Authorize(Roles = "Admin")]
+    [HttpPost("updateLesson/{lessonId:long}")]
     public async Task<IActionResult> UpdateLesson(long lessonId,LessonRequestPayload payload)
     {
         await lessonService.UpdateLessonAsync(lessonId, payload);

@@ -4,10 +4,10 @@ using school_electronic_magazine.DTO.Requests;
 using school_electronic_magazine.DTO.Response;
 using school_electronic_magazine.Models;
 using school_electronic_magazine.Repositories;
-using school_electronic_magazine.Repositories.Users;
-using school_electronic_magazine.Services.Token;
+using school_electronic_magazine.Repositories;
+using school_electronic_magazine.Services;
 
-namespace school_electronic_magazine.Services.Auth;
+namespace school_electronic_magazine.Services;
 
 public class UserService(
     IGenericRepository<User> geneticUserRepository,
@@ -74,7 +74,7 @@ public class UserService(
         return user;
     }
     
-    public async Task AddRolesAsync(long userId, List<string> roles)
+    public async Task AssignRolesAsync(long userId, List<string> roles)
     {
         if (roles == null || roles.Count == 0)
             throw new InvalidOperationException("Список ролей пуст");

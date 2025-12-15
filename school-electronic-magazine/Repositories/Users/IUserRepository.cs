@@ -1,6 +1,6 @@
 ﻿using school_electronic_magazine.DTO.Requests;
 
-namespace school_electronic_magazine.Repositories.Users;
+namespace school_electronic_magazine.Repositories;
 
 public interface IUserRepository : IGenericRepository<Models.User>
 {

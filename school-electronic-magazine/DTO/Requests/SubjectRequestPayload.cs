@@ -2,5 +2,5 @@
 
 public record SubjectRequestPayload()
 {
-    public required string Name { get; set; } = null!;
+    public required string Name { get; init; } = null!;
 }

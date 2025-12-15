@@ -1,4 +1,4 @@
-﻿namespace school_electronic_magazine.Repositories.Subject;
+﻿namespace school_electronic_magazine.Repositories;
 
 public interface ISubjectRepository : IGenericRepository<Models.Subject>
 {

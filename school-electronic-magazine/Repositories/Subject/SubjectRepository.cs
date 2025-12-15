@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using school_electronic_magazine.Data;
 
-namespace school_electronic_magazine.Repositories.Subject;
+namespace school_electronic_magazine.Repositories;
 
 public class SubjectRepository : GenericRepository<Models.Subject>, ISubjectRepository
 {

@@ -8,7 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using school_electronic_magazine.DTO.Requests;
 using school_electronic_magazine.Models;
 using school_electronic_magazine.Repositories;
-using school_electronic_magazine.Services.Token;
+using school_electronic_magazine.Services;
 
 public class TokenService(
     IConfiguration config,

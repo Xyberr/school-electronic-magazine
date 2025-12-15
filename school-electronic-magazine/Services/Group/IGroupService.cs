@@ -1,6 +1,6 @@
 ﻿using school_electronic_magazine.DTO.Requests;
 
-namespace school_electronic_magazine.Services.Group;
+namespace school_electronic_magazine.Services;
 
 public interface IGroupService
 {

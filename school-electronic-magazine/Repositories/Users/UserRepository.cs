@@ -3,7 +3,7 @@ using school_electronic_magazine.Data;
 using school_electronic_magazine.DTO.Requests;
 using school_electronic_magazine.Models;
 
-namespace school_electronic_magazine.Repositories.Users;
+namespace school_electronic_magazine.Repositories;
 
 public class UserRepository(AppDbContext context) : GenericRepository<User>(context), IUserRepository
 {

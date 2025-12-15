@@ -3,8 +3,7 @@ using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using school_electronic_magazine.DTO;
 using school_electronic_magazine.DTO.Requests;
-using school_electronic_magazine.Services.Auth;
-using school_electronic_magazine.Services.Token;
+using school_electronic_magazine.Services;
 namespace school_electronic_magazine.Controllers;
 
 [ApiController]

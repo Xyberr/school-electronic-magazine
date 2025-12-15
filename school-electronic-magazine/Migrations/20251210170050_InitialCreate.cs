@@ -141,37 +141,6 @@ namespace school_electronic_magazine.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Lesson",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    SubjectId = table.Column<long>(type: "bigint", nullable: false),
-                    TeacherId = table.Column<long>(type: "bigint", nullable: false),
-                    LessonDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ClassRoom = table.Column<string>(type: "text", nullable: false),
-                    StudentId = table.Column<long>(type: "bigint", nullable: false),
-                    Title = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
-                    UserId = table.Column<long>(type: "bigint", nullable: true),
-                    CreationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Lesson", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Lesson_Subject_SubjectId",
-                        column: x => x.SubjectId,
-                        principalTable: "Subject",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Lesson_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "RefreshToken",
                 columns: table => new
                 {
@@ -296,24 +265,67 @@ namespace school_electronic_magazine.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Lessons",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    SubjectId = table.Column<long>(type: "bigint", nullable: false),
+                    TeacherId = table.Column<long>(type: "bigint", nullable: false),
+                    LessonDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ClassRoom = table.Column<string>(type: "text", nullable: false),
+                    StudentId = table.Column<long>(type: "bigint", nullable: false),
+                    Title = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    UserId = table.Column<long>(type: "bigint", nullable: true),
+                    CreationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Lessons", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Lessons_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Lessons_Subject_SubjectId",
+                        column: x => x.SubjectId,
+                        principalTable: "Subject",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Lessons_Users_TeacherId",
+                        column: x => x.TeacherId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Lessons_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "LessonSchoolClass",
                 columns: table => new
                 {
                     LessonsId = table.Column<long>(type: "bigint", nullable: false),
-                    SchoolClassId = table.Column<long>(type: "bigint", nullable: false)
+                    SchoolClassesId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LessonSchoolClass", x => new { x.LessonsId, x.SchoolClassId });
+                    table.PrimaryKey("PK_LessonSchoolClass", x => new { x.LessonsId, x.SchoolClassesId });
                     table.ForeignKey(
-                        name: "FK_LessonSchoolClass_Lesson_LessonsId",
+                        name: "FK_LessonSchoolClass_Lessons_LessonsId",
                         column: x => x.LessonsId,
-                        principalTable: "Lesson",
+                        principalTable: "Lessons",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_LessonSchoolClass_SchoolClasses_SchoolClassId",
-                        column: x => x.SchoolClassId,
+                        name: "FK_LessonSchoolClass_SchoolClasses_SchoolClassesId",
+                        column: x => x.SchoolClassesId,
                         principalTable: "SchoolClasses",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -340,19 +352,29 @@ namespace school_electronic_magazine.Migrations
                 column: "StudentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Lesson_SubjectId",
-                table: "Lesson",
+                name: "IX_Lessons_StudentId",
+                table: "Lessons",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Lessons_SubjectId",
+                table: "Lessons",
                 column: "SubjectId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Lesson_UserId",
-                table: "Lesson",
+                name: "IX_Lessons_TeacherId",
+                table: "Lessons",
+                column: "TeacherId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Lessons_UserId",
+                table: "Lessons",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LessonSchoolClass_SchoolClassId",
+                name: "IX_LessonSchoolClass_SchoolClassesId",
                 table: "LessonSchoolClass",
-                column: "SchoolClassId");
+                column: "SchoolClassesId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RefreshToken_UserId",
@@ -396,9 +418,6 @@ namespace school_electronic_magazine.Migrations
                 name: "RefreshToken");
 
             migrationBuilder.DropTable(
-                name: "Students");
-
-            migrationBuilder.DropTable(
                 name: "SubjectUser");
 
             migrationBuilder.DropTable(
@@ -408,7 +427,7 @@ namespace school_electronic_magazine.Migrations
                 name: "ContactType");
 
             migrationBuilder.DropTable(
-                name: "Lesson");
+                name: "Lessons");
 
             migrationBuilder.DropTable(
                 name: "SchoolClasses");
@@ -417,13 +436,16 @@ namespace school_electronic_magazine.Migrations
                 name: "Role");
 
             migrationBuilder.DropTable(
+                name: "Students");
+
+            migrationBuilder.DropTable(
                 name: "Subject");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Group");
 
             migrationBuilder.DropTable(
-                name: "Group");
+                name: "Users");
         }
     }
 }

@@ -27,12 +27,12 @@ namespace school_electronic_magazine.Migrations
                     b.Property<long>("LessonsId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("SchoolClassId")
+                    b.Property<long>("SchoolClassesId")
                         .HasColumnType("bigint");
 
-                    b.HasKey("LessonsId", "SchoolClassId");
+                    b.HasKey("LessonsId", "SchoolClassesId");
 
-                    b.HasIndex("SchoolClassId");
+                    b.HasIndex("SchoolClassesId");
 
                     b.ToTable("LessonSchoolClass");
                 });
@@ -207,11 +207,15 @@ namespace school_electronic_magazine.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("StudentId");
+
                     b.HasIndex("SubjectId");
+
+                    b.HasIndex("TeacherId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Lesson");
+                    b.ToTable("Lessons", (string)null);
                 });
 
             modelBuilder.Entity("school_electronic_magazine.Models.RefreshToken", b =>
@@ -385,7 +389,7 @@ namespace school_electronic_magazine.Migrations
 
                     b.HasOne("school_electronic_magazine.Models.SchoolClass", null)
                         .WithMany()
-                        .HasForeignKey("SchoolClassId")
+                        .HasForeignKey("SchoolClassesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -460,17 +464,33 @@ namespace school_electronic_magazine.Migrations
 
             modelBuilder.Entity("school_electronic_magazine.Models.Lesson", b =>
                 {
+                    b.HasOne("school_electronic_magazine.Models.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("school_electronic_magazine.Models.Subject", "Subject")
                         .WithMany("Lesson")
                         .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("school_electronic_magazine.Models.User", "Teacher")
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("school_electronic_magazine.Models.User", null)
                         .WithMany("Lessons")
                         .HasForeignKey("UserId");
 
+                    b.Navigation("Student");
+
                     b.Navigation("Subject");
+
+                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("school_electronic_magazine.Models.RefreshToken", b =>
