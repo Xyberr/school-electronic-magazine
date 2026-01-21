@@ -1,9 +1,10 @@
 import { defineConfig } from '@hey-api/openapi-ts';
 import { loadEnv } from 'vite'
 
-const swaggerUrl = loadEnv('development', './').VITE_BACKEND_SWAGGER
+const swaggerUrl = process.env.BACKEND_SWAGGER_URL;
+
 if (!swaggerUrl) {
-    throw new Error('API_SWAGGER_URL is not defined in environment variables');
+    throw new Error('BACKEND_SWAGGER_URL is not defined in environment variables');
 }
 
 export default defineConfig({
