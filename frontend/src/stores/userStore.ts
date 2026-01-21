@@ -4,10 +4,12 @@ import { getJwtPayload } from "@/utils/jwt";
 import { postApiAuthLogin } from "@/heyapi";
 import { useRouter } from "vue-router";
 import type { LoginData, UserCredentials } from "@/types/auth";
+import { useToast } from 'primevue/usetoast';
 
 export const useUserStore = createGlobalState(() => {
   const token = useLocalStorage<string | null>("token", null)
   const router = useRouter()
+  const toast = useToast()
 
   const jwtPayload = computed(() => getJwtPayload(token.value))
 
@@ -37,13 +39,17 @@ export const useUserStore = createGlobalState(() => {
     },
   )
 
-  function logOut() {
+  function logOut(reason?: string) {
     token.value = null
     router.push('/login')
+    if (reason) {
+      toast.add({severity:'info', summary: 'Logged out', detail: reason, life: 10000})
+      return
+    }
   }
 
   watch(token, () => {
-    if (!token.value) logOut();
+    if (!token.value) logOut("Session has expired");
   },
   {
     immediate: true,
