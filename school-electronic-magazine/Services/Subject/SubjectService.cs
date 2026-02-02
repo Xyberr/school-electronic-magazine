@@ -1,4 +1,5 @@
-﻿using school_electronic_magazine.DTO.Requests;
+﻿using Microsoft.EntityFrameworkCore;
+using school_electronic_magazine.DTO.Requests;
 using school_electronic_magazine.Models;
 using school_electronic_magazine.Repositories;
 
@@ -7,12 +8,12 @@ namespace school_electronic_magazine.Services;
 public class SubjectService(ISubjectRepository subjectRepository) :  ISubjectService
 {
 
-    public async Task AddSubjectAsync(SubjectRequestPayload payload)
+    public async Task AddSubjectAsync(SubjectRequestPayload payload, CancellationToken cancellationToken)
     {
         if (payload == null)
             throw new ArgumentNullException(nameof(payload));
 
-        var exists = await subjectRepository.GetByNameAsync(payload.Name);
+        var exists = await subjectRepository.GetByNameAsync(payload.Name, cancellationToken);
         if (exists != null)
             throw new InvalidOperationException("Предмет с таким названием уже существует");
 
@@ -20,39 +21,41 @@ public class SubjectService(ISubjectRepository subjectRepository) :  ISubjectSer
         {
             Name = payload.Name,
             CreationDate = DateTime.UtcNow,
+            ModificationDate = DateTime.UtcNow,
 
         };
-
-        await subjectRepository.AddAsync(subject);
-        await subjectRepository.SaveChangesAsync();
+        
+        await subjectRepository.AddAsync(subject, cancellationToken);
+        await subjectRepository.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task UpdateSubjectAsync(long subjectId, SubjectRequestPayload payload)
+    public async Task UpdateSubjectAsync(long subjectId, SubjectRequestPayload payload, CancellationToken cancellationToken)
     {
         if (payload == null)
             throw new ArgumentNullException(nameof(payload));
 
-        var subject = await subjectRepository.GetByIdAsync(subjectId);
+        var subject = await subjectRepository.GetByIdAsync(subjectId, cancellationToken);
         if (subject == null)
             throw new InvalidOperationException("Предмет не найден");
 
-        var exists = await subjectRepository.GetByNameAsync(payload.Name);
-        if (exists != null && exists.Id != subjectId)
+        var exists = await subjectRepository.Query()
+            .AnyAsync(subject => subject.Name == payload.Name && subject.Id != subjectId);
+        if (exists)
             throw new InvalidOperationException("Предмет с таким названием уже существует");
 
         subject.Name = payload.Name;
 
-        await subjectRepository.UpdateAsync(subject);
-        await subjectRepository.SaveChangesAsync();
+        subjectRepository.Update(subject);
+        await subjectRepository.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task DeleteSubjectAsync(long subjectId)
+    public async Task DeleteSubjectAsync(long subjectId, CancellationToken cancellationToken)
     {
-        var subject = await subjectRepository.GetByIdAsync(subjectId);
-        if (subject == null)
-            throw new InvalidOperationException("Предмет не найден");
+        var affectedRows = await subjectRepository.Query()
+            .Where(x => x.Id == subjectId)
+            .ExecuteDeleteAsync(cancellationToken);
 
-        await subjectRepository.DeleteAsync(subjectId);
-        await subjectRepository.SaveChangesAsync();
+        if (affectedRows == 0)
+            throw new InvalidOperationException("Предмет не найден");
     }
 }

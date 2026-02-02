@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace school_electronic_magazine.DTO.Response;
+namespace school_electronic_magazine.DTO.Responses;
 
-public record UserAuthResponcePayload
+public record UserAuthResponsePayload
 {
     [Required] 
     public required string Token { get; init; }
@@ -10,5 +10,5 @@ public record UserAuthResponcePayload
     [Required] 
     public string RefreshToken { get; init; }
     
-    public List<String> Role { get; init; }
+    public List<string> Role { get; init; }
 }

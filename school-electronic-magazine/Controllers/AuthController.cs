@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using school_electronic_magazine.DTO;
 using school_electronic_magazine.DTO.Requests;
 using school_electronic_magazine.Services;
+
 namespace school_electronic_magazine.Controllers;
 
 [ApiController]
@@ -12,16 +13,16 @@ public class AuthController(IUserService userService, ITokenService tokenService
 {
     [HttpPost("login")]
     [AllowAnonymous]
-    public async Task<IActionResult> LoginAsync([FromBody] UserAuthRequestPayload userAuthRequestPayload)
-        => Ok(await userService.AuthorizeUserAsync(userAuthRequestPayload));
+    public async Task<IActionResult> LoginAsync([FromBody] UserAuthRequestPayload userAuthRequestPayload, CancellationToken cancellationToken)
+        => Ok(await userService.AuthorizeUserAsync(userAuthRequestPayload, cancellationToken));
 
     [AllowAnonymous]
     [HttpPost("refreshToken")]
-    public async Task<IActionResult> RefreshAsync([FromBody] RefreshTokenRequestPayload payload)
+    public async Task<IActionResult> RefreshAsync([FromBody] RefreshTokenRequestPayload payload, CancellationToken cancellationToken)
     {
         var oldToken = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
-        var tokensRequestPayload = await tokenService.RotateRefreshTokenAsync(oldToken, payload.RefreshToken);
+        var tokensRequestPayload = await tokenService.RotateRefreshTokenAsync(oldToken, payload.RefreshToken, cancellationToken);
 
         return Ok(tokensRequestPayload);
     }
@@ -38,6 +39,6 @@ public class AuthController(IUserService userService, ITokenService tokenService
     
     [HttpPost("register")]
     [AllowAnonymous]
-    public async Task<IActionResult> Register([FromBody] UserRegisterRequestPayload userRegisterRequestPayload)
-        => Ok(await userService.CreateUserAsync(userRegisterRequestPayload));
+    public async Task<IActionResult> Register([FromBody] UserRegisterRequestPayload userRegisterRequestPayload, CancellationToken cancellationToken)
+        => Ok(await userService.CreateUserAsync(userRegisterRequestPayload, cancellationToken));
 }

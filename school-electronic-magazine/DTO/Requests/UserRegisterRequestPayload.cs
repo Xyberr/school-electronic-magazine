@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 
-namespace school_electronic_magazine.DTO;
+namespace school_electronic_magazine.DTO.Requests;
 
-public record class UserRegisterRequestPayload
+public record UserRegisterRequestPayload
 {
     [Required] 
     public string Name { get; init; } = null!;

@@ -24,47 +24,62 @@ namespace school_electronic_magazine.Migrations
 
             modelBuilder.Entity("LessonSchoolClass", b =>
                 {
-                    b.Property<long>("LessonsId")
+                    b.Property<long>("LessonId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("SchoolClassesId")
+                    b.Property<long>("SchoolClassId")
                         .HasColumnType("bigint");
 
-                    b.HasKey("LessonsId", "SchoolClassesId");
+                    b.HasKey("LessonId", "SchoolClassId");
 
-                    b.HasIndex("SchoolClassesId");
+                    b.HasIndex("SchoolClassId");
 
-                    b.ToTable("LessonSchoolClass");
+                    b.ToTable("LessonSchoolClass", (string)null);
                 });
 
-            modelBuilder.Entity("RoleUser", b =>
+            modelBuilder.Entity("LessonUser", b =>
                 {
-                    b.Property<long>("RolesId")
+                    b.Property<long>("LessonId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("UsersId")
+                    b.Property<long>("UserId")
                         .HasColumnType("bigint");
 
-                    b.HasKey("RolesId", "UsersId");
+                    b.HasKey("LessonId", "UserId");
 
-                    b.HasIndex("UsersId");
+                    b.HasIndex("UserId");
 
-                    b.ToTable("UserRoles", (string)null);
+                    b.ToTable("LessonUser", (string)null);
                 });
 
             modelBuilder.Entity("SubjectUser", b =>
                 {
-                    b.Property<long>("TeacherSubjectsId")
+                    b.Property<long>("SubjectId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("TeachersId")
+                    b.Property<long>("UserId")
                         .HasColumnType("bigint");
 
-                    b.HasKey("TeacherSubjectsId", "TeachersId");
+                    b.HasKey("SubjectId", "UserId");
 
-                    b.HasIndex("TeachersId");
+                    b.HasIndex("UserId");
 
-                    b.ToTable("SubjectUser");
+                    b.ToTable("SubjectUser", (string)null);
+                });
+
+            modelBuilder.Entity("UserRoles", b =>
+                {
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("RoleId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("UserRoles", (string)null);
                 });
 
             modelBuilder.Entity("school_electronic_magazine.Models.ContactInfo", b =>
@@ -77,12 +92,16 @@ namespace school_electronic_magazine.Migrations
 
                     b.Property<string>("Contact")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<long>("ContactTypeId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("CreationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ModificationDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<long>("UserId")
@@ -94,7 +113,7 @@ namespace school_electronic_magazine.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ContactInfo");
+                    b.ToTable("ContactInfos", (string)null);
                 });
 
             modelBuilder.Entity("school_electronic_magazine.Models.ContactType", b =>
@@ -108,13 +127,17 @@ namespace school_electronic_magazine.Migrations
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTime>("ModificationDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("ContactType");
+                    b.ToTable("ContactTypes", (string)null);
                 });
 
             modelBuilder.Entity("school_electronic_magazine.Models.Grade", b =>
@@ -131,8 +154,8 @@ namespace school_electronic_magazine.Migrations
                     b.Property<long>("LessonId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("SchoolClassId")
-                        .HasColumnType("bigint");
+                    b.Property<DateTime>("ModificationDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<long>("StudentId")
                         .HasColumnType("bigint");
@@ -144,11 +167,11 @@ namespace school_electronic_magazine.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SchoolClassId");
+                    b.HasIndex("LessonId");
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("Grade");
+                    b.ToTable("Grades", (string)null);
                 });
 
             modelBuilder.Entity("school_electronic_magazine.Models.Group", b =>
@@ -165,9 +188,12 @@ namespace school_electronic_magazine.Migrations
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTime>("ModificationDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Group");
+                    b.ToTable("Groups", (string)null);
                 });
 
             modelBuilder.Entity("school_electronic_magazine.Models.Lesson", b =>
@@ -188,13 +214,13 @@ namespace school_electronic_magazine.Migrations
                     b.Property<DateTime>("LessonDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<long>("StudentId")
-                        .HasColumnType("bigint");
+                    b.Property<DateTime>("ModificationDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<long>("SubjectId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("TeacherId")
+                    b.Property<long?>("SubjectId1")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Title")
@@ -202,35 +228,34 @@ namespace school_electronic_magazine.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
-                    b.Property<long?>("UserId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("StudentId");
 
                     b.HasIndex("SubjectId");
 
-                    b.HasIndex("TeacherId");
-
-                    b.HasIndex("UserId");
+                    b.HasIndex("SubjectId1");
 
                     b.ToTable("Lessons", (string)null);
                 });
 
             modelBuilder.Entity("school_electronic_magazine.Models.RefreshToken", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("ExpiryDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsRevoked")
                         .HasColumnType("boolean");
+
+                    b.Property<DateTime>("ModificationDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Token")
                         .IsRequired()
@@ -243,7 +268,7 @@ namespace school_electronic_magazine.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshToken");
+                    b.ToTable("RefreshTokens", (string)null);
                 });
 
             modelBuilder.Entity("school_electronic_magazine.Models.Role", b =>
@@ -261,13 +286,16 @@ namespace school_electronic_magazine.Migrations
                         .HasMaxLength(1024)
                         .HasColumnType("character varying(1024)");
 
+                    b.Property<DateTime>("ModificationDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Role");
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("school_electronic_magazine.Models.SchoolClass", b =>
@@ -278,9 +306,6 @@ namespace school_electronic_magazine.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<long>("ClassId")
-                        .HasColumnType("bigint");
-
                     b.Property<int>("ClassNumber")
                         .HasColumnType("integer");
 
@@ -290,18 +315,24 @@ namespace school_electronic_magazine.Migrations
                     b.Property<int>("EducationShift")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("EnterDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<long>("EnterDateForStudents")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("GroupId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("GroupLetter")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("ModificationDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ClassId");
+                    b.HasIndex("GroupId");
 
-                    b.ToTable("SchoolClasses");
+                    b.ToTable("SchoolClasses", (string)null);
                 });
 
             modelBuilder.Entity("school_electronic_magazine.Models.Subject", b =>
@@ -315,13 +346,16 @@ namespace school_electronic_magazine.Migrations
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTime>("ModificationDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Subject");
+                    b.ToTable("Subjects", (string)null);
                 });
 
             modelBuilder.Entity("school_electronic_magazine.Models.User", b =>
@@ -344,6 +378,9 @@ namespace school_electronic_magazine.Migrations
                     b.Property<string>("Login")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("ModificationDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -383,28 +420,28 @@ namespace school_electronic_magazine.Migrations
                 {
                     b.HasOne("school_electronic_magazine.Models.Lesson", null)
                         .WithMany()
-                        .HasForeignKey("LessonsId")
+                        .HasForeignKey("LessonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("school_electronic_magazine.Models.SchoolClass", null)
                         .WithMany()
-                        .HasForeignKey("SchoolClassesId")
+                        .HasForeignKey("SchoolClassId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("RoleUser", b =>
+            modelBuilder.Entity("LessonUser", b =>
                 {
-                    b.HasOne("school_electronic_magazine.Models.Role", null)
+                    b.HasOne("school_electronic_magazine.Models.Lesson", null)
                         .WithMany()
-                        .HasForeignKey("RolesId")
+                        .HasForeignKey("LessonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("school_electronic_magazine.Models.User", null)
                         .WithMany()
-                        .HasForeignKey("UsersId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -413,13 +450,28 @@ namespace school_electronic_magazine.Migrations
                 {
                     b.HasOne("school_electronic_magazine.Models.Subject", null)
                         .WithMany()
-                        .HasForeignKey("TeacherSubjectsId")
+                        .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("school_electronic_magazine.Models.User", null)
                         .WithMany()
-                        .HasForeignKey("TeachersId")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("UserRoles", b =>
+                {
+                    b.HasOne("school_electronic_magazine.Models.Role", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("school_electronic_magazine.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -429,7 +481,7 @@ namespace school_electronic_magazine.Migrations
                     b.HasOne("school_electronic_magazine.Models.ContactType", "ContactType")
                         .WithMany("ContactInfos")
                         .HasForeignKey("ContactTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("school_electronic_magazine.Models.User", "User")
@@ -445,52 +497,34 @@ namespace school_electronic_magazine.Migrations
 
             modelBuilder.Entity("school_electronic_magazine.Models.Grade", b =>
                 {
-                    b.HasOne("school_electronic_magazine.Models.SchoolClass", "SchoolClass")
+                    b.HasOne("school_electronic_magazine.Models.Lesson", null)
                         .WithMany("Grades")
-                        .HasForeignKey("SchoolClassId")
+                        .HasForeignKey("LessonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("school_electronic_magazine.Models.User", "User")
+                    b.HasOne("school_electronic_magazine.Models.Student", "Student")
                         .WithMany("Grades")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("SchoolClass");
-
-                    b.Navigation("User");
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("school_electronic_magazine.Models.Lesson", b =>
                 {
-                    b.HasOne("school_electronic_magazine.Models.Student", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("school_electronic_magazine.Models.Subject", "Subject")
-                        .WithMany("Lesson")
-                        .HasForeignKey("SubjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("school_electronic_magazine.Models.User", "Teacher")
                         .WithMany()
-                        .HasForeignKey("TeacherId")
+                        .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("school_electronic_magazine.Models.User", null)
-                        .WithMany("Lessons")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("Student");
+                    b.HasOne("school_electronic_magazine.Models.Subject", null)
+                        .WithMany("Lesson")
+                        .HasForeignKey("SubjectId1");
 
                     b.Navigation("Subject");
-
-                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("school_electronic_magazine.Models.RefreshToken", b =>
@@ -508,7 +542,7 @@ namespace school_electronic_magazine.Migrations
                 {
                     b.HasOne("school_electronic_magazine.Models.Group", "Group")
                         .WithMany("SchoolClasses")
-                        .HasForeignKey("ClassId")
+                        .HasForeignKey("GroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -523,13 +557,15 @@ namespace school_electronic_magazine.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("school_electronic_magazine.Models.User", null)
-                        .WithOne()
-                        .HasForeignKey("school_electronic_magazine.Models.Student", "Id")
+                    b.HasOne("school_electronic_magazine.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Group");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("school_electronic_magazine.Models.ContactType", b =>
@@ -544,7 +580,7 @@ namespace school_electronic_magazine.Migrations
                     b.Navigation("Students");
                 });
 
-            modelBuilder.Entity("school_electronic_magazine.Models.SchoolClass", b =>
+            modelBuilder.Entity("school_electronic_magazine.Models.Lesson", b =>
                 {
                     b.Navigation("Grades");
                 });
@@ -558,11 +594,12 @@ namespace school_electronic_magazine.Migrations
                 {
                     b.Navigation("ContactInfos");
 
-                    b.Navigation("Grades");
-
-                    b.Navigation("Lessons");
-
                     b.Navigation("RefreshTokens");
+                });
+
+            modelBuilder.Entity("school_electronic_magazine.Models.Student", b =>
+                {
+                    b.Navigation("Grades");
                 });
 #pragma warning restore 612, 618
         }

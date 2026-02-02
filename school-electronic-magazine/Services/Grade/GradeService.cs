@@ -7,60 +7,67 @@ namespace school_electronic_magazine.Services;
 
 public class GradeService(IGenericRepository<Grade> repository, IGenericRepository<Student> studentRepository, IGenericRepository<Lesson> lessonRepository) : IGradeService
 {
-    public async Task AddGradeAsync(GradeRequestPayload payload)
+    public async Task AddGradeAsync(GradeRequestPayload payload,CancellationToken cancellationToken)
     {
         if (payload == null)
             throw new ArgumentNullException(nameof(payload));
 
-        var student = await studentRepository.GetByIdAsync(payload.StudentId);
-        if (student == null)
-            throw new InvalidOperationException("Студент не найден");
+        cancellationToken.ThrowIfCancellationRequested();
+        
+        var gradeExists = await repository.Query()
+            .AnyAsync(g =>
+                g.StudentId == payload.StudentId &&
+                g.LessonId == payload.LessonId);
 
-        var lesson = await lessonRepository.GetByIdAsync(payload.LessonId);
-        if (lesson == null)
-            throw new InvalidOperationException("Урок не найден");
-
-        var existingGrade = await repository.Query()
-            .FirstOrDefaultAsync(g => g.StudentId == student.Id && g.LessonId == lesson.Id);
-
-        if (existingGrade != null)
+        if (gradeExists)
             throw new InvalidOperationException("Оценка за этот урок уже проставлена");
 
-        var grade = new Models.Grade
+        var studentExists = await studentRepository.Query()
+            .AnyAsync(s => s.Id == payload.StudentId);
+
+        if (!studentExists)
+            throw new InvalidOperationException("Студент не найден");
+
+        var lessonExists = await lessonRepository.Query()
+            .AnyAsync(l => l.Id == payload.LessonId);
+
+        if (!lessonExists)
+            throw new InvalidOperationException("Урок не найден");
+
+        var grade = new Grade
         {
+            StudentId = payload.StudentId,
+            LessonId = payload.LessonId,
+            Value = payload.Value,
             CreationDate = DateTime.UtcNow,
-            StudentId = student.Id,
-            SchoolClassId = student.GroupId,
-            LessonId = lesson.Id,
-            Value = payload.Value
+            ModificationDate = DateTime.UtcNow
         };
 
-        await repository.AddAsync(grade);
-        await repository.SaveChangesAsync();
+        await repository.AddAsync(grade, cancellationToken);
+        await repository.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task UpdateGradeAsync(long gradeId, GradeRequestPayload payload)
+    public async Task UpdateGradeAsync(long gradeId, GradeRequestPayload payload, CancellationToken cancellationToken)
     {
         if (payload == null)
             throw new ArgumentNullException("Данные пустые");
         
-        var grade = await repository.GetByIdAsync(gradeId);
+        var grade = await repository.GetByIdAsync(gradeId, cancellationToken);
         
         grade.Value = payload.Value;
         grade.StudentId = payload.StudentId;
-        grade.SchoolClassId = payload.SchoolClassId;
         grade.LessonId = payload.LessonId;
 
-        await repository.UpdateAsync(grade);
-        await repository.SaveChangesAsync();
+        repository.Update(grade);
+        await repository.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task DeleteGradeAsync(long gradeId)
+    public async Task DeleteGradeAsync(long gradeId, CancellationToken cancellationToken)
     {
         if (gradeId == null)
             throw new ArgumentNullException("id не может быть null");
         
-        await repository.DeleteAsync(gradeId);
-        await repository.SaveChangesAsync();
+        await repository.DeleteAsync(gradeId, cancellationToken);
+        await repository.SaveChangesAsync(cancellationToken);
     }
 }

@@ -5,7 +5,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using school_electronic_magazine.DTO.Requests;
+using school_electronic_magazine.DTO.Responses;
 using school_electronic_magazine.Models;
 using school_electronic_magazine.Repositories;
 using school_electronic_magazine.Services;
@@ -18,7 +18,7 @@ public class TokenService(
 ) : ITokenService
 
 {
-    public string GenerateAccessToken(string userId, List<string> roles)
+    public string GenerateAccessToken(string userId, List<string> roles, CancellationToken cancellationToken)
     {
         var claims = new List<Claim>
         {
@@ -43,26 +43,26 @@ public class TokenService(
         return tokenHandler.WriteToken(token);
     }
     
-    public string GenerateRefreshToken()
+    public string GenerateRefreshToken(CancellationToken cancellationToken)
     {
         var bytes = new byte[64];
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(bytes);
         return Convert.ToBase64String(bytes);
     }
-    public string GetUserIdFromToken(string accessToken)
+    public string GetUserIdFromToken(string accessToken, CancellationToken cancellationToken)
     {
         var token = tokenHandler.ReadJwtToken(accessToken);
         return token.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value
                ?? throw new InvalidOperationException("UserId claim not found in token");
     }
-    public List<string> GetRolesFromToken(string accessToken)
+    public List<string> GetRolesFromToken(string accessToken, CancellationToken cancellationToken)
     {
         var token = tokenHandler.ReadJwtToken(accessToken);
         return token.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
     }
 
-    public async Task<RefreshToken?> GetValidRefreshTokenAsync(long userId, string refreshToken)
+    public async Task<RefreshToken?> GetValidRefreshTokenAsync(long userId, string refreshToken, CancellationToken cancellationToken)
     {
         var tokenRecord = await refreshRepository.Query()
             .Where(RefreshToken =>
@@ -88,40 +88,44 @@ public class TokenService(
                     $"Stored token: '{r.Token}', IsRevoked: {r.IsRevoked}, Expiry: {r.ExpiryDate}");
             }
         }
-        // DEBUB
+        
+        // DEBUG
         
         return tokenRecord;
     }
     
-    public async Task<TokensResponsePayload> RotateRefreshTokenAsync(string expiredAccessToken, string oldRefreshToken)
+    public async Task<TokensResponsePayload> RotateRefreshTokenAsync(string expiredAccessToken, string oldRefreshToken, CancellationToken cancellationToken)
     {
         var principal = GetPrincipalFromExpiredToken(expiredAccessToken);
         var userIdStr = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
                         ?? throw new UnauthorizedAccessException("Invalid token");
         var userId = long.Parse(userIdStr);
 
-        var oldToken = await GetValidRefreshTokenAsync(userId, oldRefreshToken)
+        var oldToken = await GetValidRefreshTokenAsync(userId, oldRefreshToken, cancellationToken)
                        ?? throw new UnauthorizedAccessException("Invalid refresh token");
 
         oldToken.IsRevoked = true;
         
-        var newRefreshToken = GenerateRefreshToken();
+        var newRefreshToken = GenerateRefreshToken(cancellationToken);
         var refreshExpiryMinutes = jwtOptions.Value.RefreshTokenExpiresInMinutes;
 
         var newTokenEntity = new RefreshToken
         {
             UserId = userId,
             Token = newRefreshToken,
-            ExpiryDate = DateTime.SpecifyKind(DateTime.UtcNow.AddMinutes(refreshExpiryMinutes), DateTimeKind.Utc),
-            IsRevoked = false
+            ExpiryDate = DateTime.SpecifyKind(DateTime.UtcNow.AddMinutes(refreshExpiryMinutes),
+                DateTimeKind.Utc),
+            IsRevoked = false,
+            CreationDate = DateTime.UtcNow,
+            ModificationDate = DateTime.UtcNow
         };
-
-        await refreshRepository.AddAsync(newTokenEntity);
+        
+        await refreshRepository.AddAsync(newTokenEntity, cancellationToken);
 
         var roles = principal.Claims.Where(claim => claim.Type == ClaimTypes.Role).Select(claim => claim.Value).ToList();
-        var newAccessToken = GenerateAccessToken(userIdStr, roles);
+        var newAccessToken = GenerateAccessToken(userIdStr, roles, cancellationToken);
 
-        await refreshRepository.SaveChangesAsync();
+        await refreshRepository.SaveChangesAsync(cancellationToken);
         
         return new TokensResponsePayload
         {

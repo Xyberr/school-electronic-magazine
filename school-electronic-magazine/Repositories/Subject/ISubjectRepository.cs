@@ -2,5 +2,5 @@
 
 public interface ISubjectRepository : IGenericRepository<Models.Subject>
 {
-    Task<Models.Subject?> GetByNameAsync(string name);
+    Task<Models.Subject?> GetByNameAsync(string name, CancellationToken cancellationToken);
 }

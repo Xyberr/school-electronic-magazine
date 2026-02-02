@@ -1,26 +1,28 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using school_electronic_magazine.Models.Base;
 
 namespace school_electronic_magazine.Models;
 
 public class Lesson : BaseEntity
 {
-    [Required] public long SubjectId { get; set; }
-
-    [Required] public long TeacherId { get; set; }
-
-    [Required] public DateTime LessonDate { get; set; }
-
-    [Required] public string ClassRoom { get; set; } = null!;
-
-    [Required] public long StudentId { get; set; }
-
-    [Required] [MaxLength(128)] public string Title { get; set; } = null!;
-
+    [Required] 
+    public required long SubjectId { get; set; }
     public Subject Subject { get; set; } = null!;
 
-    public Student Student { get; set; } = null!;
+    [Required] 
+    public required DateTime LessonDate { get; set; }
 
-    public User Teacher { get; set; } = null!;
+    [Required] 
+    public required string ClassRoom { get; set; } = null!;
+    
+    public ICollection<SchoolClass> SchoolClasses { get; set; } = [];
 
-    public ICollection<SchoolClass>? SchoolClasses { get; set; }
+    [Required] 
+    [MaxLength(128)] 
+    public required string Title { get; set; } = null!;
+    
+    
+    public ICollection<User> Teachers { get; set; } = [];
+    
+    public ICollection<Grade> Grades { get; set; } = [];
 }

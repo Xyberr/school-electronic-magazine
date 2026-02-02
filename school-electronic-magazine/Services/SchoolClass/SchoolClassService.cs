@@ -1,61 +1,63 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using school_electronic_magazine.DTO.Requests;
+using school_electronic_magazine.Models;
 using school_electronic_magazine.Repositories;
 
 namespace school_electronic_magazine.Services;
 
 public class SchoolClassService(IGenericRepository<Models.SchoolClass> genericSchoolClassRepository) : ISchoolClassService
 {
-    public async Task CreateSchoolClassAsync(SchoolClassRequestPayload schoolClassRequestPayload)
+    public async Task CreateSchoolClassAsync(SchoolClassRequestPayload schoolClassRequestPayload, CancellationToken cancellationToken)
     {
         if(schoolClassRequestPayload == null)
             throw new ArgumentNullException(nameof(schoolClassRequestPayload));
         
-        var SchoolClass = new Models.SchoolClass
+        var schoolClass = new Models.SchoolClass
         {
             GroupLetter = schoolClassRequestPayload.GroupLabel,
             ClassNumber = schoolClassRequestPayload.ClassNumber,
-            EnterDate = schoolClassRequestPayload.EnterDate,
-            CreationDate = DateTime.UtcNow
+            CreationDate = DateTime.UtcNow,
+            EnterDateForStudents = (uint)DateTime.UtcNow.Year,
+            GroupId = schoolClassRequestPayload.GroupId,
+            ModificationDate = DateTime.UtcNow
         };
-
-        await genericSchoolClassRepository.AddAsync(SchoolClass);
-        await genericSchoolClassRepository.SaveChangesAsync();
+        
+        await genericSchoolClassRepository.AddAsync(schoolClass, cancellationToken);
+        await genericSchoolClassRepository.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task RemoveSchoolClassAsync(long schoolClassId)
+    public async Task RemoveSchoolClassAsync(long schoolClassId, CancellationToken cancellationToken)
     {
         if(schoolClassId < 0)
             throw new ArgumentOutOfRangeException(nameof(schoolClassId));
         
-        await genericSchoolClassRepository.DeleteAsync(schoolClassId);
-        await genericSchoolClassRepository.SaveChangesAsync();
+        await genericSchoolClassRepository.DeleteAsync(schoolClassId, cancellationToken);
+        await genericSchoolClassRepository.SaveChangesAsync(cancellationToken);
 
     }
 
-    public async Task UpdateSchoolClass(long SchoolClassId, SchoolClassRequestPayload schoolClassRequestPayload)
+    public async Task UpdateSchoolClass(long schoolClassId, SchoolClassRequestPayload schoolClassRequestPayload, CancellationToken cancellationToken)
     {
         if(schoolClassRequestPayload == null)
             throw new ArgumentNullException(nameof(schoolClassRequestPayload));
 
-        var SchoolClass = await genericSchoolClassRepository.GetByIdAsync(SchoolClassId);
-        if(SchoolClass == null)
-            throw new InvalidOperationException($"School class with id {SchoolClassId} not found");
+        var schoolClass = await genericSchoolClassRepository.GetByIdAsync(schoolClassId,cancellationToken);
+        if(schoolClass == null)
+            throw new InvalidOperationException($"School class with id {schoolClassId} not found");
         
-        SchoolClass.GroupLetter = schoolClassRequestPayload.GroupLabel;
-        SchoolClass.ClassNumber = schoolClassRequestPayload.ClassNumber;
-        SchoolClass.EnterDate = schoolClassRequestPayload.EnterDate;
+        schoolClass.GroupLetter = schoolClassRequestPayload.GroupLabel;
+        schoolClass.ClassNumber = schoolClassRequestPayload.ClassNumber;
+        schoolClass.EnterDateForStudents = (uint)schoolClassRequestPayload.EnterDate.Year;
         
         
-        await genericSchoolClassRepository.UpdateAsync(SchoolClass);
-        await genericSchoolClassRepository.SaveChangesAsync();
+        genericSchoolClassRepository.Update(schoolClass);
+        await genericSchoolClassRepository.SaveChangesAsync(cancellationToken);
 
     }
 
-    public async Task<Models.SchoolClass> GetSchoolClassByIdAsync(long schoolClassId)
+    public async Task<SchoolClass> GetSchoolClassByIdAsync(long schoolClassId, CancellationToken cancellationToken)
     {
-         await genericSchoolClassRepository.GetByIdAsync(schoolClassId);
-        await genericSchoolClassRepository.SaveChangesAsync();
-        return await genericSchoolClassRepository.GetByIdAsync(schoolClassId);
+        return await genericSchoolClassRepository
+            .GetByIdAsync(schoolClassId, cancellationToken);
     }
 }

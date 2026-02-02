@@ -1,14 +1,18 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace school_electronic_magazine.Models;
+namespace school_electronic_magazine.Models.Base;
 
-public class BaseEntity
+public abstract class BaseEntity : ITimeStampable
 {
     [Key] 
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public long Id { get; set; }
-    
-    [Required] 
+
+    //ITimeStampable
+    [Required]
     public required DateTime CreationDate { get; set; }
+    
+    [Required]
+    public required DateTime ModificationDate { get; set; }
 }

@@ -9,7 +9,7 @@ public class UserRepository(AppDbContext context) : GenericRepository<User>(cont
 {
     private readonly DbSet<User> _dbSet = context.Set<User>();
 
-    public Task<User?> GetUserByLoginAsync(string login)
+    public Task<User?> GetUserByLoginAsync(string login, CancellationToken cancellationToken)
         => _dbSet.Include(user => user.Roles)
             .FirstOrDefaultAsync(user => user.Login == login);
 }

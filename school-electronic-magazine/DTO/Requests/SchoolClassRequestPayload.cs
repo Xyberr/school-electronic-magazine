@@ -1,6 +1,6 @@
 ﻿namespace school_electronic_magazine.DTO.Requests;
 
-public record SchoolClassRequestPayload()
+public record SchoolClassRequestPayload
 {
     public required string GroupLabel { get; init; }
 

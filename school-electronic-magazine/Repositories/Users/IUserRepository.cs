@@ -4,5 +4,5 @@ namespace school_electronic_magazine.Repositories;
 
 public interface IUserRepository : IGenericRepository<Models.User>
 {
-    Task<Models.User?> GetUserByLoginAsync(string login);
+    Task<Models.User?> GetUserByLoginAsync(string login, CancellationToken cancellationToken);
 }

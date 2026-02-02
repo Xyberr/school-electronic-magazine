@@ -2,9 +2,9 @@
 
 public record LessonRequestPayload
 {
-    public long? SubjectId { get; init; }
+    public long SubjectId { get; init; }
     
-    public long? TeacherId { get; init; }
+    public long TeacherId { get; init; }
     
     public required DateTime LessonDate { get; init; }
     

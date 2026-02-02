@@ -12,9 +12,9 @@ public class SubjectRepository : GenericRepository<Models.Subject>, ISubjectRepo
         _context = context;
     }
 
-    public async Task<Models.Subject?> GetByNameAsync(string name)
+    public async Task<Models.Subject?> GetByNameAsync(string name, CancellationToken cancellationToken)
     {
         return await _context.Set<Models.Subject>()
-            .FirstOrDefaultAsync(s => s.Name == name);
+            .FirstOrDefaultAsync(s => s.Name == name, cancellationToken);
     }
 }

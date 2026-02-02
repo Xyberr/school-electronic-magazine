@@ -20,108 +20,108 @@ namespace school_electronic_magazine.Controllers;
 public class AdminController(IUserService userService, ISchoolClassService schoolClassService, ISubjectService subjectService, IGroupService groupService, ILessonService lessonService) : ControllerBase
 {
     [HttpPost("assignRolesAsyncRoles/{userId:long}")]
-    public async Task<IActionResult> AssignRolesAsyncRoles([FromBody] List<string> roles, long userId)
+    public async Task<IActionResult> AssignRolesAsyncRoles([FromBody] List<string> roles, long userId, CancellationToken cancellationToken)
     {
-        await userService.AssignRolesAsync(userId, roles);
+        await userService.AssignRolesAsync(userId, roles, cancellationToken);
         return NoContent();
     }
-
+    
     [HttpDelete("removeRoles/{userId:long}")]
-    public async Task<IActionResult> RemoveRoles(long userId, List<string> roles)
+    public async Task<IActionResult> RemoveRoles(long userId, List<string> roles, CancellationToken cancellationToken)
     {
-        await userService.RemoveRolesAsync(userId, roles);
+        await userService.RemoveRolesAsync(userId, roles, cancellationToken);
         return NoContent();
     }
 
     [HttpDelete("removeUserById/{userId:long}")]
-    public async Task<IActionResult> RemoveUserByIdAsync(long userId)
+    public async Task<IActionResult> RemoveUserByIdAsync(long userId, CancellationToken cancellationToken)
     {
-        await userService.RemoveUserByIdAsync(userId);
+        await userService.RemoveUserByIdAsync(userId, cancellationToken);
         return NoContent();
     }
 
     [HttpPost("addSchoolClass")]
-    public async Task<IActionResult> addSchoolClass(SchoolClassRequestPayload schoolClassRequestPayload)
+    public async Task<IActionResult> addSchoolClass(SchoolClassRequestPayload schoolClassRequestPayload, CancellationToken cancellationToken)
     {
-        await schoolClassService.CreateSchoolClassAsync(schoolClassRequestPayload);
+        await schoolClassService.CreateSchoolClassAsync(schoolClassRequestPayload, cancellationToken);
         return NoContent();
     }
 
     [HttpDelete("removeSchoolClass/{SchoolClassId:long}")]
-    public async Task<IActionResult> RemoveSchoolClass(long SchoolClassId)
+    public async Task<IActionResult> RemoveSchoolClass(long SchoolClassId, CancellationToken cancellationToken)
     {
-        await schoolClassService.RemoveSchoolClassAsync(SchoolClassId);
+        await schoolClassService.RemoveSchoolClassAsync(SchoolClassId, cancellationToken);
         return NoContent();
     }
 
     [HttpPatch("updateSchoolClass/{SchoolClassId:long}")]
     [Authorize(Roles = "Admin, Teacher")]
-    public async Task<IActionResult> UpdateSchoolClass(long SchoolClassId, [FromBody]SchoolClassRequestPayload schoolClassRequestPayload)
+    public async Task<IActionResult> UpdateSchoolClass(long SchoolClassId, [FromBody]SchoolClassRequestPayload schoolClassRequestPayload, CancellationToken cancellationToken)
     {
-        await schoolClassService.UpdateSchoolClass(SchoolClassId ,schoolClassRequestPayload);
+        await schoolClassService.UpdateSchoolClass(SchoolClassId ,schoolClassRequestPayload,  cancellationToken);
         return NoContent();
     }
 
     [HttpPost("addSubject")]
-    public async Task<IActionResult> AddSubject([FromBody] SubjectRequestPayload subjectRequestPayload)
+    public async Task<IActionResult> AddSubject([FromBody] SubjectRequestPayload subjectRequestPayload, CancellationToken cancellationToken)
     {
-        await subjectService.AddSubjectAsync(subjectRequestPayload);
+        await subjectService.AddSubjectAsync(subjectRequestPayload, cancellationToken);
         return NoContent();
     }
 
     [HttpPatch("updateSubject{SubjectId:long}")]
-    public async Task<IActionResult> UpdateSubject(long SubjectId, [FromBody] SubjectRequestPayload subjectRequestPayload)
+    public async Task<IActionResult> UpdateSubject(long SubjectId, [FromBody] SubjectRequestPayload subjectRequestPayload,  CancellationToken cancellationToken)
     {
-        await subjectService.UpdateSubjectAsync(SubjectId, subjectRequestPayload);
+        await subjectService.UpdateSubjectAsync(SubjectId, subjectRequestPayload, cancellationToken);
         return NoContent();
     }
 
     [HttpDelete("removeSubject/{subjectId:long}")]
-    public async Task<IActionResult> RemoveSubject(long SubjectId)
+    public async Task<IActionResult> RemoveSubject(long SubjectId, CancellationToken cancellationToken)
     {
-        subjectService.DeleteSubjectAsync(SubjectId);
+        await subjectService.DeleteSubjectAsync(SubjectId, cancellationToken);
         return NoContent();
     }
     
     [HttpPost("addGroup")]
-    public async Task<IActionResult> AddGroup([FromBody] GroupRequestPayload payload)
+    public async Task<IActionResult> AddGroup([FromBody] GroupRequestPayload payload, CancellationToken cancellationToken)
     {
-        await groupService.AddGroupAsync(payload);
+        await groupService.AddGroupAsync(payload, cancellationToken);
         return NoContent();
     }
 
     [HttpPatch("updateGroup/{groupId:long}")]
-    public async Task<IActionResult> UpdateGroup(long groupId, [FromBody] GroupRequestPayload payload)
+    public async Task<IActionResult> UpdateGroup(long groupId, [FromBody] GroupRequestPayload payload, CancellationToken cancellationToken)
     {
-        await groupService.UpdateGroupAsync(groupId, payload);
+        await groupService.UpdateGroupAsync(groupId, payload, cancellationToken);
         return NoContent();
     }
 
     [HttpDelete("deleteGroup/{groupId:long}")]
-    public async Task<IActionResult> DeleteGroup(long groupId)
+    public async Task<IActionResult> DeleteGroup(long groupId, CancellationToken cancellationToken)
     {
-        await groupService.DeleteGroupAsync(groupId);
+        await groupService.DeleteGroupAsync(groupId, cancellationToken);
         return NoContent();
     }
 
     [HttpPost("AddLesson")]
-    public async Task<IActionResult> AddLesson(LessonRequestPayload payload)
+    public async Task<IActionResult> AddLesson(LessonRequestPayload payload,  CancellationToken cancellationToken)
     {
-        await lessonService.AddLessonAsync(payload);
+        await lessonService.AddLessonAsync(payload, cancellationToken);
         return NoContent();
     }
 
     [HttpDelete("RemoveLesson/{lessonId:long}")] 
-    public async Task<IActionResult> RemoveLesson(long lessonId)
+    public async Task<IActionResult> RemoveLesson(long lessonId, CancellationToken cancellationToken)
     {
-        await lessonService.DeleteLessonAsync(lessonId);
+        await lessonService.DeleteLessonAsync(lessonId, cancellationToken);
         return NoContent();
     }
 
     [HttpPost("updateLesson/{lessonId:long}")]
-    public async Task<IActionResult> UpdateLesson(long lessonId,LessonRequestPayload payload)
+    public async Task<IActionResult> UpdateLesson(long lessonId,LessonRequestPayload payload,  CancellationToken cancellationToken)
     {
-        await lessonService.UpdateLessonAsync(lessonId, payload);
+        await lessonService.UpdateLessonAsync(lessonId, payload, cancellationToken);
         return NoContent();
     }
     

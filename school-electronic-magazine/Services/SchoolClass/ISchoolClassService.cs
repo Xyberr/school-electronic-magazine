@@ -6,8 +6,8 @@ namespace school_electronic_magazine.Services;
 
 public interface ISchoolClassService
 {
-    Task CreateSchoolClassAsync(SchoolClassRequestPayload schoolClassRequestPayload);
-    Task RemoveSchoolClassAsync(long schoolClassId);
-    Task UpdateSchoolClass(long SchoolClassId,SchoolClassRequestPayload schoolClassRequestPayload);
-    Task<Models.SchoolClass> GetSchoolClassByIdAsync(long schoolClassId);
+    Task CreateSchoolClassAsync(SchoolClassRequestPayload schoolClassRequestPayload, CancellationToken cancellationToken);
+    Task RemoveSchoolClassAsync(long schoolClassId, CancellationToken cancellationToken);
+    Task UpdateSchoolClass(long SchoolClassId,SchoolClassRequestPayload schoolClassRequestPayload, CancellationToken cancellationToken);
+    Task<Models.SchoolClass> GetSchoolClassByIdAsync(long schoolClassId, CancellationToken cancellationToken);
 }

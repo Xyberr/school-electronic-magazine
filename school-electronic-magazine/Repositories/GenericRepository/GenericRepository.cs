@@ -6,51 +6,66 @@ using school_electronic_magazine.Models;
 
 namespace school_electronic_magazine.Repositories;
 
-public class GenericRepository<T> : IGenericRepository<T> where T : class
+public class GenericRepository<T> : IGenericRepository<T>
+    where T : class
 {
-    private readonly AppDbContext _context;
-    private readonly DbSet<T> _dbSet;
+    protected readonly AppDbContext Context;
+    protected readonly DbSet<T> DbSet;
 
     public GenericRepository(AppDbContext context)
     {
-        _context = context ?? throw new ArgumentNullException(nameof(context));
-        _dbSet = _context.Set<T>();
+        Context = context ?? throw new ArgumentNullException(nameof(context));
+        DbSet = Context.Set<T>();
     }
 
-    public async Task<T?> GetByIdAsync(long id)
-         => await _dbSet.FindAsync(id);
-
-    public async Task<IEnumerable<T>> GetAllAsync()
-        => await _dbSet.ToListAsync();
-
-    public async Task<T> AddAsync(T entity)
+    public async Task<T?> GetByIdAsync(long id, CancellationToken cancellationToken)
     {
-        if (entity == null) throw new ArgumentNullException(nameof(entity));
+        return await DbSet.FindAsync(
+            new object[] { id },
+            cancellationToken
+        );
+    }
 
-        await _dbSet.AddAsync(entity);
+    public async Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        return await DbSet
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
 
+    public async Task<T> AddAsync(T entity, CancellationToken cancellationToken)
+    {
+        if (entity == null)
+            throw new ArgumentNullException(nameof(entity));
+
+        await DbSet.AddAsync(entity, cancellationToken);
         return entity;
     }
 
-    public async Task UpdateAsync(T entity)
+    public void Update(T entity)
     {
-        if (entity == null) throw new ArgumentNullException(nameof(entity));
+        if (entity == null)
+            throw new ArgumentNullException(nameof(entity));
 
-        _dbSet.Update(entity);
+        DbSet.Update(entity);
     }
 
-    public async Task DeleteAsync(long id)
+    public async Task DeleteAsync(long id, CancellationToken cancellationToken)
     {
-        var entity = await GetByIdAsync(id);
-        if (entity != null)
-        {
-            _dbSet.Remove(entity);
-        }
+        var entity = await GetByIdAsync(id, cancellationToken);
+        if (entity == null)
+            return;
+
+        DbSet.Remove(entity);
     }
 
-    public Task<int> SaveChangesAsync()
-        => _context.SaveChangesAsync();
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        return await Context.SaveChangesAsync(cancellationToken);
+    }
 
     public IQueryable<T> Query()
-        => _dbSet.AsQueryable();
+    {
+        return DbSet.AsQueryable();
+    }
 }
