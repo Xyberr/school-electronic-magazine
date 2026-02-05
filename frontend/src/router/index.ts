@@ -11,8 +11,16 @@ if (import.meta.hot) {
   handleHotUpdate(router);
 }
 
+// public routes that do NOT require authentication
+// /login is handled separately because it has special logic
+const PUBLIC_PATHS = new Set(["/template"])
+
 // auth check
 router.beforeEach((to) => {
+  if (to.name === "/[...unknown]") {
+    return;
+  }
+
   const token = localStorage.getItem("token");
 
   if (to.path == "/login") {
@@ -35,7 +43,7 @@ router.beforeEach((to) => {
     return "/private";
   }
 
-  if (!to.meta.requiresAuth) {
+  if (PUBLIC_PATHS.has(to.path)) {
     return;
   }
 
