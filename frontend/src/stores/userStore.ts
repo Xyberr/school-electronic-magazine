@@ -50,9 +50,6 @@ export const useUserStore = createGlobalState(() => {
 
   watch(token, () => {
     if (!token.value) logOut("Session has expired");
-  },
-  {
-    immediate: true,
   });
 
   return reactive({
