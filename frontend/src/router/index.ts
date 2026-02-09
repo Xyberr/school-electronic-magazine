@@ -21,29 +21,13 @@ router.beforeEach((to) => {
     return;
   }
 
-  const token = localStorage.getItem("token");
-
-  if (to.path == "/login") {
-    if (!token) {
-      return;
-    }
-
-    const decoded = getJwtPayload(token);
-    if (decoded === null) {
-      localStorage.removeItem("token");
-      return "/login";
-    }
-
-    const expired = decoded.exp * 1000 < Date.now();
-    if (expired) {
-      localStorage.removeItem("token");
-      return "/login?reason=expired";
-    }
-
-    return "/private";
+  if (PUBLIC_PATHS.has(to.path)) {
+    return;
   }
 
-  if (PUBLIC_PATHS.has(to.path)) {
+  const token = localStorage.getItem("token");
+
+  if (to.path === "/login" && !token) {
     return;
   }
 
@@ -52,16 +36,24 @@ router.beforeEach((to) => {
   }
 
   const decoded = getJwtPayload(token);
-  if (decoded === null) {
-    localStorage.removeItem("token");
+  if (!decoded || !decoded.exp) {
     return "/login";
   }
 
   const expired = decoded.exp * 1000 < Date.now();
+
   if (expired) {
-    localStorage.removeItem("token");
-    return "/login?reason=expired";
+    if (to.path === "/login") {
+      return;
+    }
+
+    return { path: "/login", query: { reason: "expired" } };
+  }
+
+  if (to.path === "/login") {
+    return "/private";
   }
 });
+
 
 export default router;
