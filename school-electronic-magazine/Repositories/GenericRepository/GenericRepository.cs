@@ -1,8 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.Data;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using school_electronic_magazine.Data;
-using school_electronic_magazine.DTO.Requests;
-using school_electronic_magazine.Models;
 
 namespace school_electronic_magazine.Repositories;
 
@@ -18,14 +15,17 @@ public class GenericRepository<T> : IGenericRepository<T>
         DbSet = Context.Set<T>();
     }
 
-    public async Task<T?> GetByIdAsync(long id, CancellationToken cancellationToken)
+    public async Task<T?> GetByIdAsync(long id, CancellationToken cancellationToken, bool asNoTracking = true)
     {
-        return await DbSet.FindAsync(
-            new object[] { id },
-            cancellationToken
-        );
-    }
+        IQueryable<T> query = DbSet;
 
+        if (asNoTracking)
+            query = query.AsNoTracking();
+
+        return await query.FirstOrDefaultAsync(
+            e => EF.Property<long>(e, "Id") == id,
+            cancellationToken);
+    }
     public async Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken)
     {
         return await DbSet
@@ -66,6 +66,6 @@ public class GenericRepository<T> : IGenericRepository<T>
 
     public IQueryable<T> Query()
     {
-        return DbSet.AsQueryable();
+        return DbSet.AsNoTracking();
     }
 }

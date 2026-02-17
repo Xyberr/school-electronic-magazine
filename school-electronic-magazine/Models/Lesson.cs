@@ -14,13 +14,13 @@ public class Lesson : BaseEntity
 
     [Required] 
     public required string ClassRoom { get; set; } = null!;
-    
-    public ICollection<SchoolClass> SchoolClasses { get; set; } = [];
 
     [Required] 
     [MaxLength(128)] 
     public required string Title { get; set; } = null!;
     
+    
+    public ICollection<SchoolClass> SchoolClasses { get; set; } = [];
     
     public ICollection<User> Teachers { get; set; } = [];
     

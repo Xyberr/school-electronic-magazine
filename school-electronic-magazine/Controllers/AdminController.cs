@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using school_electronic_magazine.DTO.Requests;
-using school_electronic_magazine.Repositories;
+using school_electronic_magazine.DTO.Requests; 
 using school_electronic_magazine.Services;
 
 
@@ -56,9 +55,9 @@ public class AdminController(IUserService userService, ISchoolClassService schoo
 
     [HttpPatch("updateSchoolClass/{SchoolClassId:long}")]
     [Authorize(Roles = "Admin, Teacher")]
-    public async Task<IActionResult> UpdateSchoolClass(long SchoolClassId, [FromBody]SchoolClassRequestPayload schoolClassRequestPayload, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateSchoolClassAsync(long SchoolClassId, [FromBody]SchoolClassRequestPayload schoolClassRequestPayload, CancellationToken cancellationToken)
     {
-        await schoolClassService.UpdateSchoolClass(SchoolClassId ,schoolClassRequestPayload,  cancellationToken);
+        await schoolClassService.UpdateSchoolClassAsync(SchoolClassId ,schoolClassRequestPayload,  cancellationToken);
         return NoContent();
     }
 

@@ -27,6 +27,7 @@ public class User : BaseEntity
     public ICollection<ContactInfo> ContactInfos { get; set; } = [];
     public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
     
+    //Свойства навигации, специфичные для учителя (используются только в том случае, если у пользователя есть роль учителя)
     public ICollection<Subject> TeacherSubjects { get; set; } = [];
     public ICollection<Lesson> Lessons { get; set; } = [];
 }

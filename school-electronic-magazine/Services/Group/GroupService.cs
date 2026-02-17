@@ -15,22 +15,20 @@ public class GroupService(IGenericRepository<Models.Group> groupRepository, IGen
 
         var currentYear = DateTime.UtcNow.Year;
 
-        // Диапазон поиска
-        var yearStart = new DateTime(currentYear, 1, 1);
-        var yearEnd = yearStart.AddYears(1);
+        // Проверка только если ClassId задан
+        if (payload.ClassId.HasValue)
+        {
+            var exists = await groupRepository.Query()
+                .AnyAsync(g => g.ClassId == payload.ClassId &&
+                               g.CreationDate.Year == currentYear, cancellationToken);
 
-        var exists = await groupRepository.Query()
-            .AnyAsync(g =>
-                g.ClassId == payload.ClassId &&
-                g.CreationDate >= yearStart &&
-                g.CreationDate < yearEnd);
-
-        if (exists)
-            throw new InvalidOperationException("Группа для данного класса в этом году уже существует");
+            if (exists)
+                throw new InvalidOperationException("Группа для данного класса в этом году уже существует");
+        }
 
         var group = new Models.Group
         {
-            ClassId = payload.ClassId,
+            ClassId = payload.ClassId,  // может быть null
             CreationDate = DateTime.UtcNow,
             ModificationDate = DateTime.UtcNow
         };
@@ -41,13 +39,11 @@ public class GroupService(IGenericRepository<Models.Group> groupRepository, IGen
 
     public async Task UpdateGroupAsync(long groupId, GroupRequestPayload payload, CancellationToken cancellationToken)
     {
-        var group = await groupRepository.GetByIdAsync(groupId,cancellationToken);
+        var group = await groupRepository.GetByIdAsync(groupId, cancellationToken);
         if (group == null)
             throw new InvalidOperationException("Группа не найдена");
 
         group.ClassId = payload.ClassId;
-
-        groupRepository.Update(group);
         await groupRepository.SaveChangesAsync(cancellationToken);
     }
 

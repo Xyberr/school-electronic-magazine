@@ -113,7 +113,7 @@ public class UserService(
         var user = await geneticUserRepository
             .Query()
             .Include(user => user.Roles)
-            .FirstOrDefaultAsync(user => user.Id == userId);
+            .FirstOrDefaultAsync(user => user.Id == userId, cancellationToken);
 
         if (user == null)
             throw new ArgumentException("Пользователь не найден");

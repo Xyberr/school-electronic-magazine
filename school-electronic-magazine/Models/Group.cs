@@ -6,7 +6,8 @@ namespace school_electronic_magazine.Models;
 public class Group : BaseEntity
 {
     [Required]
-    public required long ClassId { get; set; }
+    public required long? ClassId { get; set; }
+    public SchoolClass Class { get; set; }
 
     public int CreationYear { get; set; }
     

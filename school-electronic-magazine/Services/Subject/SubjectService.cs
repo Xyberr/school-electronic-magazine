@@ -22,7 +22,6 @@ public class SubjectService(ISubjectRepository subjectRepository) :  ISubjectSer
             Name = payload.Name,
             CreationDate = DateTime.UtcNow,
             ModificationDate = DateTime.UtcNow,
-
         };
         
         await subjectRepository.AddAsync(subject, cancellationToken);
@@ -39,12 +38,12 @@ public class SubjectService(ISubjectRepository subjectRepository) :  ISubjectSer
             throw new InvalidOperationException("Предмет не найден");
 
         var exists = await subjectRepository.Query()
-            .AnyAsync(subject => subject.Name == payload.Name && subject.Id != subjectId);
+            .AnyAsync(subject => subject.Name == payload.Name && subject.Id != subjectId,  cancellationToken);
+        
         if (exists)
             throw new InvalidOperationException("Предмет с таким названием уже существует");
 
         subject.Name = payload.Name;
-
         subjectRepository.Update(subject);
         await subjectRepository.SaveChangesAsync(cancellationToken);
     }

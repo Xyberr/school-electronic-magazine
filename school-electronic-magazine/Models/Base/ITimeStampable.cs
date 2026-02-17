@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace school_electronic_magazine.Models.Base;
+﻿namespace school_electronic_magazine.Models.Base;
 
 public interface ITimeStampable
 {

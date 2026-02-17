@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
-using school_electronic_magazine.DTO;
 using school_electronic_magazine.DTO.Requests;
 using school_electronic_magazine.Services;
 

@@ -2,5 +2,5 @@
 
 public record GroupRequestPayload
 {
-    public long ClassId { get; init; }
+    public long? ClassId { get; init; }
 }

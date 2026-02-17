@@ -12,28 +12,26 @@ public class LessonService(IGenericRepository<Lesson> lessonRepository, IGeneric
         if (payload == null)
             throw new ArgumentNullException(nameof(payload));
 
-        {
-            var teacherExists = await userRepository.Query()
-                .AnyAsync(t => t.Id == payload.TeacherId);
-            if (!teacherExists)
-                throw new InvalidOperationException("Учитель не найден");
-        }
+        var teacherExists = await userRepository.Query()
+            .AnyAsync(t => t.Id == payload.TeacherId, cancellationToken);
+        if (!teacherExists)
+            throw new InvalidOperationException("Учитель не найден");
 
-        {
-            var subjectExists = await subjectRepository.Query()
-                .AnyAsync(s => s.Id == payload.SubjectId);
-            if (!subjectExists)
-                throw new InvalidOperationException("Предмет не найден");
-        }
+        var subjectExists = await subjectRepository.Query()
+            .AnyAsync(s => s.Id == payload.SubjectId, cancellationToken);
+        if (!subjectExists)
+            throw new InvalidOperationException("Предмет не найден");
+        
+        var now = DateTime.UtcNow;
 
         var lesson = new Lesson
         {
             LessonDate = payload.LessonDate,
+            SubjectId = payload.SubjectId,
             ClassRoom = payload.ClassRoom,
             Title = payload.Title,
-            SubjectId = payload.SubjectId,
-            CreationDate = DateTime.UtcNow,
-            ModificationDate = DateTime.UtcNow,
+            CreationDate = now,
+            ModificationDate = now,
         };
 
         await lessonRepository.AddAsync(lesson, cancellationToken);
@@ -49,6 +47,7 @@ public class LessonService(IGenericRepository<Lesson> lessonRepository, IGeneric
        
        lesson.Title = payload.Title;
        lesson.ClassRoom = payload.ClassRoom;
+       lesson.SubjectId = payload.SubjectId;
        lesson.LessonDate = payload.LessonDate;
         
        lessonRepository.Update(lesson);

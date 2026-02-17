@@ -134,7 +134,7 @@ public class TokenService(
         };
     }
 
-    public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+    private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!));
 
