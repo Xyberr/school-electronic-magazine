@@ -48,9 +48,16 @@ export const useUserStore = createGlobalState(() => {
     }
   }
 
-  watch(token, () => {
-    if (!token.value) logOut("Session has expired");
-  });
+  function expireSession() {
+    token.value = null
+
+    toast.add({
+      severity: 'info',
+      summary: 'Logged out',
+      detail: 'Session has expired',
+      life: 10000,
+    })
+  }
 
   return reactive({
     token,
@@ -58,5 +65,6 @@ export const useUserStore = createGlobalState(() => {
     isLoginLoading,
     loginAsync,
     logOut,
+    expireSession,
   })
 });

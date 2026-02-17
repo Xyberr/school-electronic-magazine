@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import { useUserStore } from '@/stores/userStore';
-import { useRouter } from 'vue-router';
 
 const { logOut } = useUserStore()
-const router = useRouter()
 
 const onLogOut = () => {
   logOut()
-  router.push('/login')
 }
 
 definePage({
