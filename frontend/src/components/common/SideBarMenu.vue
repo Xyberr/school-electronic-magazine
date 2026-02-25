@@ -1,28 +1,18 @@
 <script setup>
 import Button from 'primevue/button';
 import Drawer from 'primevue/drawer';
-import { useUserStore } from '@/stores/userStore';
 import { ref } from 'vue';
 import SideBarLinks from './SideBarLinks.vue';
+import LogOutButton from './LogOutButton.vue';
 
 const visible = ref(false);
-
-const userStore = useUserStore()
-
-const onLogOut = () => {
-  userStore.logOut()
-}
 </script>
 
 <template>
     <div class="sidebar">
         <SideBarLinks />
 
-        <Button 
-            icon="pi pi-sign-out" 
-            label="Log Out" 
-            @click="onLogOut"
-        />
+        <LogOutButton />
     </div>
 
     <div class="mobileSidebar">
@@ -36,8 +26,7 @@ const onLogOut = () => {
             <div class="mobileSideBarContent">
                 <SideBarLinks />
     
-                <Button icon="pi pi-sign-out" label="Log Out" @click="onLogOut">
-                </Button>
+                <LogOutButton />
             </div>
         </Drawer>
 
