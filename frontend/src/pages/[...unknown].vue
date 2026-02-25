@@ -6,6 +6,12 @@ const router = useRouter()
 const onLeave = () => {
   router.push("/login")
 }
+
+definePage({
+  meta: {
+    layout: 'main',
+  },
+})
 </script>
 
 <template>
