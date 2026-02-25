@@ -1,6 +1,5 @@
 <script setup>
 import SideBarMenu from '@/components/common/SideBarMenu.vue';
-import { RouterView } from 'vue-router';
 </script>
 
 <template>
@@ -15,5 +14,9 @@ import { RouterView } from 'vue-router';
 <style scoped>
 .layout {
     display: flex;
+}
+
+.content {
+    padding: 16px;
 }
 </style>
