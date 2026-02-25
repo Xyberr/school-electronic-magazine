@@ -16,14 +16,13 @@ const onLogOut = () => {
 
 <template>
     <div class="sidebar">
-        <SideBarLinks></SideBarLinks>
+        <SideBarLinks />
 
         <Button 
             icon="pi pi-sign-out" 
             label="Log Out" 
             @click="onLogOut"
-        >
-        </Button>
+        />
     </div>
 
     <div class="mobileSidebar">
@@ -31,12 +30,11 @@ const onLogOut = () => {
             icon="pi pi-bars"
             variant="text"
             severity="contrast"
-            @click="visible = !visible"
-        >
-        </Button>
+            @click="visible = !visible" 
+        />
         <Drawer v-model:visible="visible" header="Menu">
             <div class="mobileSideBarContent">
-                <SideBarLinks></SideBarLinks>
+                <SideBarLinks />
     
                 <Button icon="pi pi-sign-out" label="Log Out" @click="onLogOut">
                 </Button>
