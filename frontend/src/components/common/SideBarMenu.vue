@@ -7,10 +7,10 @@ import SideBarLinks from './SideBarLinks.vue';
 
 const visible = ref(false);
 
-const { logOut } = useUserStore()
+const userStore = useUserStore()
 
 const onLogOut = () => {
-  logOut()
+  userStore.logOut()
 }
 </script>
 
@@ -50,9 +50,7 @@ const onLogOut = () => {
     background-color: #fff;
     padding: 16px;
     position: relative;
-    width: fit-content;
-    min-width: 200px;
-    max-width: 300px;
+    width: clamp(200px, 22vw, 300px);
     left: 0;
     display: flex;
     flex-direction: column;
