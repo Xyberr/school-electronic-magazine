@@ -2,7 +2,7 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 import globals from 'globals'
 import js from '@eslint/js'
 import pluginVue from 'eslint-plugin-vue'
-import skipFormatting from '@vue/eslint-config-prettier/skip-formatting'
+import tseslint from 'typescript-eslint'
 
 export default defineConfig([
   {
@@ -10,29 +10,31 @@ export default defineConfig([
     files: ['**/*.{js,mjs,jsx,vue,ts}'],
   },
 
-  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**']),
+  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**', '**/src/heyapi/**']),
 
   {
     languageOptions: {
       globals: {
         ...globals.browser,
+        ...globals.node,
       },
     },
   },
 
-  {
-    "vue/multi-word-component-names": ["error", {
-      "ignores": []
-    }]
-  },
-
-  {
-    "globals": {
-      "definePage": "readonly"
-    }
-  },
-
   js.configs.recommended,
+  ...tseslint.configs.recommended,
   ...pluginVue.configs['flat/essential'],
-  skipFormatting,
+
+  {
+    name: 'app/rules',
+    languageOptions: {
+      globals: {
+        definePage: 'readonly',
+      },
+    },
+    rules: {
+      quotes: ['error', 'single', { avoidEscape: true }],
+      'vue/multi-word-component-names': 'off',
+    },
+  },
 ])
