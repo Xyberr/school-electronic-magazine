@@ -44,7 +44,7 @@ const onLogOut = () => {
     </div>
 </template>
 
-<style>
+<style scoped>
 .sidebar {
     height: 100vh;
     background-color: #fff;

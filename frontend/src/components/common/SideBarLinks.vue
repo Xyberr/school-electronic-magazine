@@ -10,7 +10,7 @@
     </div>
 </template>
 
-<style>
+<style scoped>
 .pagesList {
     display: flex;
     flex-direction: column;
