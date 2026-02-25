@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter()
 const onLeave = () => {
-  router.push("/login")
+  router.push('/login')
 }
 
 definePage({

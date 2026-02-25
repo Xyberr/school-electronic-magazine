@@ -10,7 +10,7 @@ const route = useRoute()
 const layoutComponent = computed(() => {
   const layout = route.meta.layout
 
-  if (layout === "main") {
+  if (layout === 'main') {
     return MainLayout
   }
 

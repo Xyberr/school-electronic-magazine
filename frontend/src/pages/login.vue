@@ -8,7 +8,7 @@ const route = useRoute()
 const userStore = useUserStore()
 
 onMounted(() => {
-  if (route.query.reason === "expired") {
+  if (route.query.reason === 'expired') {
     userStore.expireSession()
   }
 })

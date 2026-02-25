@@ -1,6 +1,6 @@
-import { getJwtPayload } from "@/utils/jwt";
-import { createRouter, createWebHistory } from "vue-router";
-import { routes, handleHotUpdate } from "vue-router/auto-routes";
+import { getJwtPayload } from '@/utils/jwt';
+import { createRouter, createWebHistory } from 'vue-router';
+import { routes, handleHotUpdate } from 'vue-router/auto-routes';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -13,11 +13,11 @@ if (import.meta.hot) {
 
 // public routes that do NOT require authentication
 // /login is handled separately because it has special logic
-const PUBLIC_PATHS = new Set(["/template"])
+const PUBLIC_PATHS = new Set(['/template'])
 
 // auth check
 router.beforeEach((to) => {
-  if (to.name === "/[...unknown]") {
+  if (to.name === '/[...unknown]') {
     return;
   }
 
@@ -25,33 +25,33 @@ router.beforeEach((to) => {
     return;
   }
 
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem('token');
 
-  if (to.path === "/login" && !token) {
+  if (to.path === '/login' && !token) {
     return;
   }
 
   if (!token) {
-    return "/login";
+    return '/login';
   }
 
   const decoded = getJwtPayload(token);
   if (!decoded || !decoded.exp) {
-    return "/login";
+    return '/login';
   }
 
   const expired = decoded.exp * 1000 < Date.now();
 
   if (expired) {
-    if (to.path === "/login") {
+    if (to.path === '/login') {
       return;
     }
 
-    return { path: "/login", query: { reason: "expired" } };
+    return { path: '/login', query: { reason: 'expired' } };
   }
 
-  if (to.path === "/login") {
-    return "/private";
+  if (to.path === '/login') {
+    return '/private';
   }
 });
 

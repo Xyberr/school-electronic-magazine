@@ -1,13 +1,13 @@
-import { computed, reactive, watch } from "vue";
-import { createGlobalState, useAsyncState, useLocalStorage } from "@vueuse/core";
-import { getJwtPayload } from "@/utils/jwt";
-import { postApiAuthLogin } from "@/heyapi";
-import { useRouter } from "vue-router";
-import type { LoginData, UserCredentials } from "@/types/auth";
+import { computed, reactive } from 'vue';
+import { createGlobalState, useAsyncState, useLocalStorage } from '@vueuse/core';
+import { getJwtPayload } from '@/utils/jwt';
+import { postApiAuthLogin } from '@/heyapi';
+import { useRouter } from 'vue-router';
+import type { LoginData, UserCredentials } from '@/types/auth';
 import { useToast } from 'primevue/usetoast';
 
 export const useUserStore = createGlobalState(() => {
-  const token = useLocalStorage<string | null>("token", null)
+  const token = useLocalStorage<string | null>('token', null)
   const router = useRouter()
   const toast = useToast()
 
@@ -30,11 +30,11 @@ export const useUserStore = createGlobalState(() => {
         const data = res?.data as LoginData
 
         if (!data || !data.token) {
-          throw new Error("Invalid login or password");
+          throw new Error('Invalid login or password');
         }
 
         token.value = data.token
-        router.push("/private");
+        router.push('/private');
       },
     },
   )
