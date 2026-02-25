@@ -63,7 +63,7 @@ public class LessonService(IGenericRepository<Lesson> lessonRepository, IGeneric
         if (lesson == null)
             throw new InvalidOperationException("Урок не найден");
         
-        await lessonRepository.DeleteAsync(lessonId, cancellationToken);
+        await lessonRepository.DeleteByIdAsync(lessonId, cancellationToken);
         await lessonRepository.SaveChangesAsync(cancellationToken);
     }
 }

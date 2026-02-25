@@ -50,15 +50,12 @@ public class GenericRepository<T> : IGenericRepository<T>
         DbSet.Update(entity);
     }
 
-    public async Task DeleteAsync(long id, CancellationToken cancellationToken)
+    public async Task<int> DeleteByIdAsync(long id, CancellationToken cancellationToken)
     {
-        var entity = await GetByIdAsync(id, cancellationToken);
-        if (entity == null)
-            return;
-
-        DbSet.Remove(entity);
+        return await DbSet
+            .Where(e => EF.Property<long>(e, "Id") == id)
+            .ExecuteDeleteAsync(cancellationToken);
     }
-
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
         return await Context.SaveChangesAsync(cancellationToken);

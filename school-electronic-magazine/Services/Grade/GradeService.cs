@@ -68,7 +68,7 @@ public class GradeService(IGenericRepository<Grade> repository, IGenericReposito
         if (gradeId <= 0)
             throw new ArgumentOutOfRangeException(nameof(gradeId));
         
-        await repository.DeleteAsync(gradeId, cancellationToken);
+        await repository.DeleteByIdAsync(gradeId, cancellationToken);
         await repository.SaveChangesAsync(cancellationToken);
     }
 }

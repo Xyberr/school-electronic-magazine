@@ -69,7 +69,7 @@ public class GroupService(IGenericRepository<Models.Group> groupRepository, IGen
         if (groupData.HasStudents)
             throw new InvalidOperationException("В группе есть студенты, удаление невозможно");
 
-        await groupRepository.DeleteAsync(groupId, cancellationToken);
+        await groupRepository.DeleteByIdAsync(groupId, cancellationToken);
         await groupRepository.SaveChangesAsync(cancellationToken);
     }
 }

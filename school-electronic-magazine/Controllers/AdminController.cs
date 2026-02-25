@@ -19,16 +19,16 @@ namespace school_electronic_magazine.Controllers;
 public class AdminController(IUserService userService, ISchoolClassService schoolClassService, ISubjectService subjectService, IGroupService groupService, ILessonService lessonService) : ControllerBase
 {
     [HttpPost("assignRolesAsyncRoles/{userId:long}")]
-    public async Task<IActionResult> AssignRolesAsyncRoles([FromBody] List<string> roles, long userId, CancellationToken cancellationToken)
+    public async Task<IActionResult> AssignRolesAsyncRoles([FromBody] List<long> roleIds, long userId, CancellationToken cancellationToken)
     {
-        await userService.AssignRolesAsync(userId, roles, cancellationToken);
+        await userService.AssignRolesAsync(userId, roleIds, cancellationToken);
         return NoContent();
     }
     
     [HttpDelete("removeRoles/{userId:long}")]
-    public async Task<IActionResult> RemoveRoles(long userId, List<string> roles, CancellationToken cancellationToken)
+    public async Task<IActionResult> RemoveRoles(long userId, List<long>? roleIds, CancellationToken cancellationToken)
     {
-        await userService.RemoveRolesAsync(userId, roles, cancellationToken);
+        await userService.RemoveRolesAsync(userId, roleIds, cancellationToken);
         return NoContent();
     }
 

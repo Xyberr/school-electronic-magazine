@@ -8,7 +8,7 @@ public interface IUserService
 {
     Task<UserAuthResponsePayload> AuthorizeUserAsync(UserAuthRequestPayload userAuthRequestPayload, CancellationToken cancellationToken);
     Task<User> CreateUserAsync(UserRegisterRequestPayload userDto, CancellationToken cancellationToken);
-    Task AssignRolesAsync(long userId, List<string> roles, CancellationToken cancellationToken);
-    Task RemoveRolesAsync(long userId, List<string> roles, CancellationToken cancellationToken);
+    Task AssignRolesAsync(long userId, List<long> roleIds, CancellationToken cancellationToken);
+    Task RemoveRolesAsync(long userId, List<long> roleIds, CancellationToken cancellationToken);
     Task RemoveUserByIdAsync(long userId, CancellationToken cancellationToken);
 }

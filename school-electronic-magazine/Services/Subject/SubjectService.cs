@@ -50,11 +50,12 @@ public class SubjectService(ISubjectRepository subjectRepository) :  ISubjectSer
 
     public async Task DeleteSubjectAsync(long subjectId, CancellationToken cancellationToken)
     {
-        var affectedRows = await subjectRepository.Query()
-            .Where(x => x.Id == subjectId)
-            .ExecuteDeleteAsync(cancellationToken);
+        var subject = await subjectRepository.GetByIdAsync(subjectId, cancellationToken);
 
-        if (affectedRows == 0)
+        if (subject == null)
             throw new InvalidOperationException("Предмет не найден");
+
+        subjectRepository.DeleteByIdAsync(subjectId, cancellationToken);
+        await subjectRepository.SaveChangesAsync(cancellationToken);
     }
 }

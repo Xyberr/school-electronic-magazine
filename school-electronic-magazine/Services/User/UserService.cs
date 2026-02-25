@@ -16,99 +16,100 @@ public class UserService(
 {
     public async Task<UserAuthResponsePayload> AuthorizeUserAsync(UserAuthRequestPayload payload, CancellationToken cancellationToken)
     {
-        if (payload == null || string.IsNullOrWhiteSpace(payload.Login))
+        var normalizedLogin = payload?.Login?.Trim();
+
+        var user = !string.IsNullOrWhiteSpace(normalizedLogin)
+            ? await userRepository.GetUserByLoginAsync(normalizedLogin, cancellationToken)
+            : null;
+
+        if (user == null ||
+            payload == null ||
+            string.IsNullOrWhiteSpace(payload.Password) ||
+            !BCrypt.Net.BCrypt.Verify(payload.Password, user.PasswordHash))
+        {
             throw new UnauthorizedAccessException("Неверный логин или пароль");
+        }
 
-        var user = await userRepository.GetUserByLoginAsync(payload.Login.Trim(), cancellationToken);
-        if (user == null || !BCrypt.Net.BCrypt.Verify(payload.Password, user.PasswordHash))
-            throw new UnauthorizedAccessException("Неверный логин или пароль");
+        var roles = user.Roles.Select(role => role.Name).ToList();
 
-        var roles = user.Roles?.Select(r => r.Name).ToList() ?? new List<string>();
+        var now = DateTime.UtcNow;
 
-        var refreshTokenEntity = new Models.RefreshToken
+        var refreshTokenValue = tokenService.GenerateRefreshToken();
+
+        var refreshTokenEntity = new RefreshToken
         {
             UserId = user.Id,
-            Token = tokenService.GenerateRefreshToken(cancellationToken),
-            ExpiryDate = DateTime.UtcNow.AddDays(30),
+            Token = refreshTokenValue,
+            ExpiryDate = now.AddDays(30),
             IsRevoked = false,
-            CreationDate = DateTime.UtcNow,
-            ModificationDate = DateTime.UtcNow
+            CreationDate = now,
+            ModificationDate = now
         };
-        
-        await geneticRefreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
-        await geneticRefreshTokenRepository.SaveChangesAsync(cancellationToken);
 
-        var accessToken = tokenService.GenerateAccessToken(user.Id.ToString(), roles, cancellationToken);
+        await geneticRefreshTokenRepository
+            .AddAsync(refreshTokenEntity, cancellationToken);
+
+        await geneticRefreshTokenRepository
+            .SaveChangesAsync(cancellationToken);
+
+        var accessToken = tokenService
+            .GenerateAccessToken(user.Id.ToString(), roles);
 
         return new UserAuthResponsePayload
         {
             Token = accessToken,
             Role = roles,
-            RefreshToken = refreshTokenEntity.Token
+            RefreshToken = refreshTokenValue
         };
     }
-
-    public async Task<User> CreateUserAsync(UserRegisterRequestPayload userDto,  CancellationToken cancellationToken)
+    
+    public async Task<User> CreateUserAsync(UserRegisterRequestPayload userDto, CancellationToken cancellationToken)
     {
-        if (userDto == null)
-            throw new ArgumentNullException(nameof(userDto));
+        ArgumentNullException.ThrowIfNull(userDto);
 
-        var existingUser = await userRepository.GetUserByLoginAsync(userDto.Login.Trim(), cancellationToken);
-        if (existingUser != null)
-            throw new InvalidOperationException("Пользователь с таким логином, уже существует");
+        var normalizedLogin = userDto.Login?.Trim();
+
+        if (string.IsNullOrWhiteSpace(normalizedLogin))
+            throw new ArgumentException("Логин не может быть пустым");
+
+        var exists = await geneticUserRepository
+            .Query()
+            .AnyAsync(user => user.Login == normalizedLogin, cancellationToken);
+
+        if (exists)
+            throw new InvalidOperationException("Пользователь с таким логином уже существует");
+
+        var now = DateTime.UtcNow;
 
         var user = new User
         {
             Name = userDto.Name,
             Surname = userDto.Surname,
             DateOfBirth = userDto.DateOfBirth,
-            Login = userDto.Login.Trim(),
+            Login = normalizedLogin,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password),
-            LastOnline = DateTime.UtcNow,
-            CreationDate = DateTime.UtcNow,
-            ModificationDate = DateTime.UtcNow
+            LastOnline = now,
+            CreationDate = now,
+            ModificationDate = now
         };
-        
+
         await geneticUserRepository.AddAsync(user, cancellationToken);
-        await geneticUserRepository.SaveChangesAsync(cancellationToken);
-        return user;
-    }
-    
-    public async Task AssignRolesAsync(long userId, List<string> roles, CancellationToken cancellationToken)
-    {
-        if (roles == null || roles.Count == 0)
-            throw new InvalidOperationException("Список ролей пуст");
 
-        var user = await geneticUserRepository.GetByIdAsync(userId, cancellationToken);
-
-        if (user == null)
-            throw new InvalidOperationException("Пользователь не найден");
-
-        user.Roles ??= new List<Role>();
-        
-        var allRoles = await geneticRoleRepository.GetAllAsync(cancellationToken);
-
-        foreach (var roleName in roles)
+        try
         {
-            var role = allRoles.FirstOrDefault(r => r.Name == roleName);
-
-            if (role == null)
-                throw new InvalidOperationException($"Роль '{roleName}' не найдена");
-
-            if (user.Roles.Any(r => r.Id == role.Id))
-                continue;
-
-            user.Roles.Add(role);
+            await geneticUserRepository.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException)
+        {
+            throw new InvalidOperationException("Пользователь с таким логином уже существует");
         }
 
-        geneticUserRepository.Update(user);
-        await geneticUserRepository.SaveChangesAsync(cancellationToken);
+        return user;
     }
-
-    public async Task RemoveRolesAsync(long userId, List<string> roles,  CancellationToken cancellationToken)
+    public async Task AssignRolesAsync(long userId, List<long> roleIds, CancellationToken cancellationToken)
     {
-        if (roles == null || roles.Count == 0)
-            throw new ArgumentException("Не указаны роли, которые нужно удалить");
+        if (roleIds == null || roleIds.Count == 0)
+            throw new InvalidOperationException("Список ролей пуст");
 
         var user = await geneticUserRepository
             .Query()
@@ -116,33 +117,62 @@ public class UserService(
             .FirstOrDefaultAsync(user => user.Id == userId, cancellationToken);
 
         if (user == null)
-            throw new ArgumentException("Пользователь не найден");
+            throw new InvalidOperationException("Пользователь не найден");
+
+        var distinctRoleIds = roleIds.Distinct().ToList();
+
+        var rolesToAdd = await geneticRoleRepository
+            .Query()
+            .Where(r => distinctRoleIds.Contains(r.Id))
+            .ToListAsync(cancellationToken);
+        
+        if (rolesToAdd.Count != distinctRoleIds.Count)
+            throw new InvalidOperationException("Одна или несколько ролей не найдены");
+
+        var existingRoleIds = user.Roles
+            .Select(role => role.Id)
+            .ToHashSet();
+
+        var newRoles = rolesToAdd
+            .Where(role => !existingRoleIds.Contains(role.Id));
+
+        foreach (var role in newRoles)
+            user.Roles.Add(role);
+
+        await geneticUserRepository.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task RemoveRolesAsync(long userId, List<long> roleIds, CancellationToken cancellationToken)
+    {
+        if (roleIds == null || roleIds.Count == 0)
+            throw new ArgumentException("Не указаны роли для удаления");
+
+        var user = await geneticUserRepository
+            .Query()
+            .Include(u => u.Roles)
+            .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+
+        if (user == null)
+            throw new InvalidOperationException("Пользователь не найден");
 
         if (user.Roles == null || user.Roles.Count == 0)
-            throw new InvalidOperationException("У пользователя нет ролей");
+            return; 
 
-        var allRoles = await geneticRoleRepository.GetAllAsync(cancellationToken);
+        var rolesSet = roleIds.ToHashSet();
 
-        foreach (var roleName in roles)
-        {
-            var role = allRoles.FirstOrDefault(role => role.Name == roleName);
-            if (role == null)
-                throw new ArgumentException($"Роль '{roleName}' не найдена");
+        var rolesToRemove = user.Roles
+            .Where(r => rolesSet.Contains(r.Id))
+            .ToList();
 
-            var existingRole = user.Roles.FirstOrDefault(role => role.Name == roleName);
-            if (existingRole == null)
-                throw new InvalidOperationException($"У пользователя нет роли '{roleName}'");
+        foreach (var role in rolesToRemove)
+            user.Roles.Remove(role);
 
-            user.Roles.Remove(existingRole);
-        }
-
-        geneticUserRepository.Update(user);
         await geneticUserRepository.SaveChangesAsync(cancellationToken);
     }
 
     public async Task RemoveUserByIdAsync(long userId, CancellationToken cancellationToken)
     {
-        await geneticUserRepository.DeleteAsync(userId,cancellationToken);
+        await geneticUserRepository.DeleteByIdAsync(userId,cancellationToken);
         await geneticUserRepository.SaveChangesAsync(cancellationToken);
     }
 }

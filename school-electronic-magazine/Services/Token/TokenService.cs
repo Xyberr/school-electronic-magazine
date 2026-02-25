@@ -16,9 +16,8 @@ public class TokenService(
     IGenericRepository<RefreshToken> refreshRepository,
     IOptions<Jwt> jwtOptions
 ) : ITokenService
-
 {
-    public string GenerateAccessToken(string userId, List<string> roles, CancellationToken cancellationToken)
+    public string GenerateAccessToken(string userId, List<string> roles)
     {
         var claims = new List<Claim>
         {
@@ -42,91 +41,89 @@ public class TokenService(
         var token = tokenHandler.CreateToken(descriptor);
         return tokenHandler.WriteToken(token);
     }
-    
-    public string GenerateRefreshToken(CancellationToken cancellationToken)
+
+    public string GenerateRefreshToken()
     {
         var bytes = new byte[64];
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(bytes);
         return Convert.ToBase64String(bytes);
     }
-    public string GetUserIdFromToken(string accessToken, CancellationToken cancellationToken)
+
+    public string GetUserIdFromToken(string accessToken)
     {
         var token = tokenHandler.ReadJwtToken(accessToken);
         return token.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value
                ?? throw new InvalidOperationException("UserId claim not found in token");
     }
-    public List<string> GetRolesFromToken(string accessToken, CancellationToken cancellationToken)
+
+    public List<string> GetRolesFromToken(string accessToken)
     {
         var token = tokenHandler.ReadJwtToken(accessToken);
-        return token.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
+        return token.Claims
+            .Where(c => c.Type == ClaimTypes.Role)
+            .Select(c => c.Value)
+            .ToList();
     }
 
-    public async Task<RefreshToken?> GetValidRefreshTokenAsync(long userId, string refreshToken, CancellationToken cancellationToken)
+    public async Task<RefreshToken?> GetValidRefreshTokenAsync(
+        long userId,
+        string refreshToken,
+        CancellationToken cancellationToken)
     {
-        var tokenRecord = await refreshRepository.Query()
-            .Where(RefreshToken =>
-                RefreshToken.UserId == userId &&
-                RefreshToken.Token == refreshToken &&
-                !RefreshToken.IsRevoked &&
-                RefreshToken.ExpiryDate > DateTime.UtcNow)
-            .FirstOrDefaultAsync();
-        
-        // TODO: Убрать
-        if (tokenRecord == null)
-        {
-            Console.WriteLine($"[TokenService] Token not valid for user {userId}");
-            Console.WriteLine($"Incoming token: '{refreshToken}'");
-
-            var userTokens = await refreshRepository.Query()
-                .Where(t => t.UserId == userId)
-                .ToListAsync();
-
-            foreach (var r in userTokens)
-            {
-                Console.WriteLine(
-                    $"Stored token: '{r.Token}', IsRevoked: {r.IsRevoked}, Expiry: {r.ExpiryDate}");
-            }
-        }
-        
-        // DEBUG
-        
-        return tokenRecord;
+        return await refreshRepository.Query()
+            .Where(t =>
+                t.UserId == userId &&
+                t.Token == refreshToken &&
+                !t.IsRevoked &&
+                t.ExpiryDate > DateTime.UtcNow)
+            .FirstOrDefaultAsync(cancellationToken);
     }
-    
-    public async Task<TokensResponsePayload> RotateRefreshTokenAsync(string expiredAccessToken, string oldRefreshToken, CancellationToken cancellationToken)
+
+    public async Task<TokensResponsePayload> RotateRefreshTokenAsync(
+        string expiredAccessToken,
+        string oldRefreshToken,
+        CancellationToken cancellationToken)
     {
         var principal = GetPrincipalFromExpiredToken(expiredAccessToken);
+
         var userIdStr = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
                         ?? throw new UnauthorizedAccessException("Invalid token");
+
         var userId = long.Parse(userIdStr);
 
-        var oldToken = await GetValidRefreshTokenAsync(userId, oldRefreshToken, cancellationToken)
-                       ?? throw new UnauthorizedAccessException("Invalid refresh token");
+        var oldToken = await GetValidRefreshTokenAsync(
+            userId,
+            oldRefreshToken,
+            cancellationToken)
+            ?? throw new UnauthorizedAccessException("Invalid refresh token");
 
         oldToken.IsRevoked = true;
-        
-        var newRefreshToken = GenerateRefreshToken(cancellationToken);
+
+        var newRefreshToken = GenerateRefreshToken();
         var refreshExpiryMinutes = jwtOptions.Value.RefreshTokenExpiresInMinutes;
 
         var newTokenEntity = new RefreshToken
         {
             UserId = userId,
             Token = newRefreshToken,
-            ExpiryDate = DateTime.SpecifyKind(DateTime.UtcNow.AddMinutes(refreshExpiryMinutes),
-                DateTimeKind.Utc),
+            ExpiryDate = DateTime.UtcNow.AddMinutes(refreshExpiryMinutes),
             IsRevoked = false,
             CreationDate = DateTime.UtcNow,
             ModificationDate = DateTime.UtcNow
         };
-        
+
         await refreshRepository.AddAsync(newTokenEntity, cancellationToken);
 
-        var roles = principal.Claims.Where(claim => claim.Type == ClaimTypes.Role).Select(claim => claim.Value).ToList();
-        var newAccessToken = GenerateAccessToken(userIdStr, roles, cancellationToken);
+        var roles = principal.Claims
+            .Where(c => c.Type == ClaimTypes.Role)
+            .Select(c => c.Value)
+            .ToList();
+
+        var newAccessToken = GenerateAccessToken(userIdStr, roles);
 
         await refreshRepository.SaveChangesAsync(cancellationToken);
-        
+
         return new TokensResponsePayload
         {
             AccessToken = newAccessToken,
@@ -136,7 +133,8 @@ public class TokenService(
 
     private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!));
+        var key = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(config["Jwt:Key"]!));
 
         var validationParams = new TokenValidationParameters
         {

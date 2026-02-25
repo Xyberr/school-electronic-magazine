@@ -7,7 +7,7 @@ public interface IGenericRepository<T> where T : class
 
     Task<T> AddAsync(T entity, CancellationToken cancellationToken);
     void Update(T entity);
-    Task DeleteAsync(long id, CancellationToken cancellationToken);
+    Task<int> DeleteByIdAsync(long id, CancellationToken cancellationToken);
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     IQueryable<T> Query();

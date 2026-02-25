@@ -37,7 +37,7 @@ public class SchoolClassService(IGenericRepository<SchoolClass> schoolClassRepos
         if (schoolClass.Lessons.Any())
             throw new InvalidOperationException("Невозможно удалить класс, так как к нему привязаны уроки");
 
-        await schoolClassRepository.DeleteAsync(schoolClassId, cancellationToken);
+        await schoolClassRepository.DeleteByIdAsync(schoolClassId, cancellationToken);
         await schoolClassRepository.SaveChangesAsync(cancellationToken);
 
     }
