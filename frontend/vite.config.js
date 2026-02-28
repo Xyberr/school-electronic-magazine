@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     VueRouter({}),
     vue(),
-    ...(mode === "development" ? [vueDevTools()] : []),
+    ...(mode === 'development' ? [vueDevTools()] : []),
   ],
   resolve: {
     alias: {

@@ -1,5 +1,4 @@
 import { defineConfig } from '@hey-api/openapi-ts';
-import { loadEnv } from 'vite'
 
 const swaggerUrl = process.env.BACKEND_SWAGGER_URL;
 

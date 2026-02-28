@@ -4,7 +4,7 @@ import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import Password from 'primevue/password';
 import { ref } from 'vue';
-import * as z from "zod";
+import * as z from 'zod';
 import { useUserStore } from '@/stores/userStore';
 
 const userStore = useUserStore();
@@ -12,25 +12,25 @@ const userStore = useUserStore();
 const UserScheme = z.object({
   login: z
     .string()
-    .min(5, "Invalid login length")
-    .max(32, "Invalid login length"),
+    .min(5, 'Invalid login length')
+    .max(32, 'Invalid login length'),
   password: z
     .string()
-    .min(5, "Invalid password length")
-    .max(64, "Invalid password length"),
+    .min(5, 'Invalid password length')
+    .max(64, 'Invalid password length'),
 })
 
-const login = ref("")
-const password = ref("")
+const login = ref('')
+const password = ref('')
 
-const loginError = ref("")
-const passwordError = ref("")
-const serverError = ref("")
+const loginError = ref('')
+const passwordError = ref('')
+const serverError = ref('')
 
 const onBtnLogin = async () => {
-  loginError.value = ""
-  passwordError.value = ""
-  serverError.value = ""
+  loginError.value = ''
+  passwordError.value = ''
+  serverError.value = ''
 
   const validation = UserScheme.safeParse({
     login: login.value,
@@ -40,8 +40,8 @@ const onBtnLogin = async () => {
   if (!validation.success) {
     const issues = z.treeifyError(validation.error)
 
-    loginError.value = issues.properties?.login?.errors[0] || ""
-    passwordError.value = issues.properties?.password?.errors[0] || ""
+    loginError.value = issues.properties?.login?.errors[0] || ''
+    passwordError.value = issues.properties?.password?.errors[0] || ''
 
     return
   }
@@ -53,11 +53,11 @@ const onBtnLogin = async () => {
       password: password.value
     });
   } catch (error) {
-    let message = "Unknown error"
+    let message = 'Unknown error'
 
     if (error instanceof Error) {
       message = error.message
-    } else if (typeof error === "string") {
+    } else if (typeof error === 'string') {
       message = error
     } else {
       try {
