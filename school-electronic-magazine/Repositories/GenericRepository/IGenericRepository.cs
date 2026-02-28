@@ -1,14 +1,14 @@
-﻿using Microsoft.AspNetCore.Identity.Data;
-
-namespace school_electronic_magazine.Repositories;
+﻿namespace school_electronic_magazine.Repositories;
 
 public interface IGenericRepository<T> where T : class
 {
-    Task<T?> GetByIdAsync(int id);
-    Task<IEnumerable<T>> GetAllAsync();
-    Task<T> AddAsync(T entity);
-    Task UpdateAsync(T entity);
-    Task DeleteAsync(int id);
-    Task<int> SaveChangesAsync();
+    Task<T?> GetByIdAsync(long id, CancellationToken cancellationToken, bool asNoTracking = true);
+    Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken);
+
+    Task<T> AddAsync(T entity, CancellationToken cancellationToken);
+    void Update(T entity);
+    Task<int> DeleteByIdAsync(long id, CancellationToken cancellationToken);
+
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     IQueryable<T> Query();
 }

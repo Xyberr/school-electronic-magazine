@@ -1,16 +1,14 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using school_electronic_magazine.Data;
 using school_electronic_magazine.Models;
 using school_electronic_magazine.Repositories;
-using school_electronic_magazine.Repositories.Users;
-using school_electronic_magazine.Services.Auth;
-using school_electronic_magazine.Services.Token;
+using school_electronic_magazine.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,6 +81,14 @@ builder.Services.AddScoped<IGenericRepository<User>, GenericRepository<User>>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddSingleton<JwtSecurityTokenHandler>();
+builder.Services.AddScoped<ISchoolClassService, SchoolClassService>();
+builder.Services.AddScoped<ISchoolClassRepository, SchoolClassRepository>();
+builder.Services.AddScoped<IGroupService, GroupService>();
+builder.Services.AddScoped<ISubjectService, SubjectService>();
+builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
+builder.Services.AddScoped<ILessonService, LessonService>();
+builder.Services.AddScoped<IGradeService, GradeService>();
+
 
 // Временно для фронта
 builder.Services.AddCors(options =>

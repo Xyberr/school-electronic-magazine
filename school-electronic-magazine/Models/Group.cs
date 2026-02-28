@@ -1,16 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using school_electronic_magazine.Models.Base;
 
 namespace school_electronic_magazine.Models;
 
 public class Group : BaseEntity
 {
     [Required]
-    public long ClassId { get; set; }
-    
-    [Required] 
-    public long StudentId { get; set; }
-    
-    public User User { get; set; } = null!;
-    public ICollection<SchoolClass> SchoolClasses { get; set; } = new List<SchoolClass>();
+    public required long? ClassId { get; set; }
+    public SchoolClass Class { get; set; }
 
+    public int CreationYear { get; set; }
+    
+    public ICollection<Student> Students { get; set; } = [];
+    public ICollection<SchoolClass> SchoolClasses { get; set; } = [];
+    
 }

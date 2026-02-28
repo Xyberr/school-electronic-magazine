@@ -1,21 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using school_electronic_magazine.Models.Base;
 
 namespace school_electronic_magazine.Models;
 
 public class Grade : BaseEntity
 {
     [Required] 
-    public long StudentId { get; set; }
+    public required long StudentId { get; set; }
+    public Student Student { get; set; } = null!;
     
     [Required] 
-    public long SchoolClassId { get; set; }
-    
-    [Required] 
-    public long LessonId { get; set; }
+    public required long LessonId { get; set; }
     
     [MaxLength(10)] 
-    public string Value { get; set; }
-    
-    public User User { get; set; } = null!;
-    public SchoolClass SchoolClass { get; set; } = null!;
+    public required string Value { get; set; }
 }

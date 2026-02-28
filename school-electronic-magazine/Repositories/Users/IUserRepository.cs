@@ -1,8 +1,8 @@
-﻿using school_electronic_magazine.DTO.Requests;
+﻿using school_electronic_magazine.Models;
 
-namespace school_electronic_magazine.Repositories.Users;
+namespace school_electronic_magazine.Repositories;
 
-public interface IUserRepository : IGenericRepository<Models.User>
+public interface IUserRepository : IGenericRepository<User>
 {
-    Task<Models.User?> GetUserByLoginAsync(string login);
+    Task<User?> GetUserByLoginAsync(string login, CancellationToken cancellationToken);
 }
